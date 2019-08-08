@@ -1,3 +1,29 @@
 body {
     text-align: center;
 }
+
+.home_icon {
+    margin: 10px;
+}
+
+@media screen and (orientation:landscape) {
+    .home_icon {
+        height: 128px;
+    }
+    @media screen and (min-height:720px) {
+        .home_icon {
+            height: 256px;
+        }
+    }
+}
+
+@media screen and (orientation:portrait) {
+    .home_icon {
+        width: 100%;
+    }
+    @media screen and (min-width:256px) {
+        .home_icon {
+            width: 256px;
+        }
+    }
+}
