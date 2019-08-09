@@ -1,8 +1,8 @@
 "use strict";
 
 var maze = [];
-var mazeWidth = 16;
-var mazeHeight = 16;
+var mazeWidth = 32;
+var mazeHeight = 32;
 
 // Generate maze
 {
