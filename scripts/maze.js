@@ -10,7 +10,7 @@ var mazeHeight = 32;
     for (var x = 0; x < mazeWidth * 2 + 1; x++) {
         maze[x] = [];
         for (var y = 0; y < mazeHeight * 2 + 1; y++) {
-            maze[x][y] = x % 2 == 1 && y % 2 == 1;
+            maze[x][y] = x % 2 === 1 && y % 2 === 1;
         }
     }
 
@@ -24,7 +24,7 @@ var mazeHeight = 32;
     var nextTiles = [{x: Math.floor(Math.random() * mazeWidth), y: Math.floor(Math.random() * mazeHeight)}];
     nextTilesSet.add(JSON.stringify(nextTiles[0]));
 
-    while (nextTiles.length != 0) {
+    while (nextTiles.length !== 0) {
         var index = Math.floor(Math.random() * nextTiles.length);
         var curTile = nextTiles[index];
         nextTiles.splice(index, 1);
@@ -32,13 +32,13 @@ var mazeHeight = 32;
 
         var possibleAttachments = [];
 
-        if (curTile.x != 0)
+        if (curTile.x !== 0)
             possibleAttachments.push({x: curTile.x - 1, y: curTile.y});
-        if (curTile.y != 0)
+        if (curTile.y !== 0)
             possibleAttachments.push({x: curTile.x, y: curTile.y - 1});
-        if (curTile.x != mazeWidth - 1)
+        if (curTile.x !== mazeWidth - 1)
             possibleAttachments.push({x: curTile.x + 1, y: curTile.y});
-        if (curTile.y != mazeHeight - 1)
+        if (curTile.y !== mazeHeight - 1)
             possibleAttachments.push({x: curTile.x, y: curTile.y + 1});
 
         for (var i = 0; i < possibleAttachments.length; i++) {
@@ -52,7 +52,7 @@ var mazeHeight = 32;
             }
         }
 
-        if (possibleAttachments.length != 0) {
+        if (possibleAttachments.length !== 0) {
             var adjTile = possibleAttachments[Math.floor(Math.random() * possibleAttachments.length)];
             maze[((curTile.x * 2 + 1) + (adjTile.x * 2 + 1)) / 2][((curTile.y * 2 + 1) + (adjTile.y * 2 + 1)) / 2] = true;
         }
@@ -70,19 +70,19 @@ var drawMaze = function(canvas) {
     for (var x = 0; x < mazeWidth * 2 + 1; x++) {
         for (var y = 0; y < mazeHeight * 2 + 1; y++) {
             if (!maze[x][y]) {
-                if (x != 0 && !maze[x-1][y]) {
+                if (x !== 0 && !maze[x-1][y]) {
                     ctx.moveTo(x * 8 + 4, y * 8 + 4);
                     ctx.lineTo(x * 8, y * 8 + 4);
                 }
-                if (y != 0 && !maze[x][y-1]) {
+                if (y !== 0 && !maze[x][y-1]) {
                     ctx.moveTo(x * 8 + 4, y * 8 + 4);
                     ctx.lineTo(x * 8 + 4, y * 8);
                 }
-                if (x != mazeWidth * 2 && !maze[x+1][y]) {
+                if (x !== mazeWidth * 2 && !maze[x+1][y]) {
                     ctx.moveTo(x * 8 + 4, y * 8 + 4);
                     ctx.lineTo(x * 8 + 8, y * 8 + 4);
                 }
-                if (y != mazeHeight * 2 && !maze[x][y+1]) {
+                if (y !== mazeHeight * 2 && !maze[x][y+1]) {
                     ctx.moveTo(x * 8 + 4, y * 8 + 4);
                     ctx.lineTo(x * 8 + 4, y * 8 + 8);
                 }
@@ -90,8 +90,8 @@ var drawMaze = function(canvas) {
         }
     }
     ctx.stroke();
-}
+};
 
 window.onload = function() {
     drawMaze(document.getElementById("maze"))
-}
+};
