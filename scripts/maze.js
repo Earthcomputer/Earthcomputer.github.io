@@ -1,3 +1,5 @@
+"use strict";
+
 var maze = [];
 var mazeWidth = 16;
 var mazeHeight = 16;
