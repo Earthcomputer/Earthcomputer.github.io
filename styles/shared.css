@@ -10,11 +10,6 @@ header {
     background-color: black;
 }
 
-header .title {
-    display: inline;
-    line-height: 64px;
-}
-
 footer {
     margin: 15px;
     background-color: black;
@@ -66,7 +61,26 @@ a:visited {
 
 .icon {
     width: 64px;
-    display: inline-block;
+}
+
+.icon_container {
+    vertical-align: middle;
+}
+
+.title {
+    text-align: center;
+}
+
+@media only screen and (min-width: 460px) {
+    .title {
+        display: inline;
+        line-height: 64px;
+        vertical-align: middle;
+        text-align: left;
+    }
+    .icon_container {
+        display: inline-block;
+    }
 }
 
 @media only screen and (min-width: 720px) {
