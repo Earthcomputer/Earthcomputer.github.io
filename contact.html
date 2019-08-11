@@ -1,3 +1,26 @@
 ---
 layout: page
 ---
+<ul>
+    <li><a href="https://github.com/{{ site.github_uname }}">
+        <div class="icon_container"><img class="social_icon" src="/images/github.png" alt="GitHub" /></div>
+        {{ site.github_uname }}
+    </a></li>
+    <li>
+        <div class="icon_container"><img class="social_icon" src="/images/discord.svg" alt="Discord" /></div>
+        {{ site.discord_uname }}
+    </li>
+    <li><a href="https://youtube.com/{{ site.youtube_uname }}">
+        <div class="icon_container"><img class="social_icon" src="/images/youtube.png" alt="YouTube" /></div>
+        {{ site.youtube_uname }}
+    </a></li>
+    <li><a href="https://twitch.tv/{{ site.twitch_uname }}">
+        <div class="icon_container"><img class="social_icon" src="/images/twitch.png" alt="Twitch" /></div>
+        /{{ site.twitch_uname }}
+    </a></li>
+    <li><a href="https://twitter.com/{{ site.twitter_uname }}">
+        <div class="icon_container"><img class="social_icon" src="/images/twitter.svg" alt="Twitter" /></div>
+        @{{ site.twitter_uname }}
+    </a></li>
+    <li>Email: <a href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+</ul>

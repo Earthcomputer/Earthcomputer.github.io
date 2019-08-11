@@ -8,6 +8,7 @@ body {
 
 header {
     background-color: black;
+    margin: 15px;
 }
 
 footer {
@@ -57,6 +58,11 @@ a:visited {
 
 .monospace {
     font-family: "Consolas", "Courier New", Courier, monospace;
+}
+
+.social_icon {
+    width: 24px;
+    margin: 12px; /* Required to be half the width as per the rules of these logos */
 }
 
 .icon {
