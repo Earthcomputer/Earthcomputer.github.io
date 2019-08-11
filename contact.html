@@ -2,25 +2,25 @@
 layout: page
 ---
 <ul>
-    <li><a href="https://github.com/{{ site.github_uname }}">
-        <div class="icon_container"><img class="social_icon" src="/images/github.png" alt="GitHub" /></div>
-        {{ site.github_uname }}
-    </a></li>
+    <li>
+        <div class="icon_container"><a href="https://github.com/{{ site.github_uname }}"><img class="social_icon" src="/images/github.png" alt="GitHub" /></a></div>
+        <a href="https://github.com/{{ site.github_uname }}">{{ site.github_uname }}</a>
+    </li>
     <li>
         <div class="icon_container"><img class="social_icon" src="/images/discord.svg" alt="Discord" /></div>
         {{ site.discord_uname }}
     </li>
-    <li><a href="https://youtube.com/{{ site.youtube_uname }}">
-        <div class="icon_container"><img class="social_icon" src="/images/youtube.png" alt="YouTube" /></div>
-        {{ site.youtube_uname }}
-    </a></li>
-    <li><a href="https://twitch.tv/{{ site.twitch_uname }}">
-        <div class="icon_container"><img class="social_icon" src="/images/twitch.png" alt="Twitch" /></div>
-        /{{ site.twitch_uname }}
-    </a></li>
-    <li><a href="https://twitter.com/{{ site.twitter_uname }}">
-        <div class="icon_container"><img class="social_icon" src="/images/twitter.svg" alt="Twitter" /></div>
-        @{{ site.twitter_uname }}
-    </a></li>
+    <li>
+        <div class="icon_container"><a href="https://youtube.com/{{ site.youtube_uname }}"><img class="social_icon" src="/images/youtube.png" alt="YouTube" /></a></div>
+        <a href="https://youtube.com/{{ site.youtube_uname }}">{{ site.youtube_uname }}</a>
+    </li>
+    <li>
+        <div class="icon_container"><a href="https://twitch.tv/{{ site.twitch_uname }}"><img class="social_icon" src="/images/twitch.png" alt="Twitch" /></a></div>
+        <a href="https://twitch.tv/{{ site.twitch_uname }}">/{{ site.twitch_uname }}</a>
+    </li>
+    <li>
+        <div class="icon_container"><a href="https://twitter.com/{{ site.twitter_uname }}"><img class="social_icon" src="/images/twitter.svg" alt="Twitter" /></a></div>
+        <a href="https://twitter.com/{{ site.twitter_uname }}">@{{ site.twitter_uname }}</a>
+    </li>
     <li>Email: <a href="mailto:{{ site.email }}">{{ site.email }}</a></li>
 </ul>
