@@ -2,6 +2,15 @@ body {
     text-align: center;
 }
 
+nav {
+    display: inline-block;
+    vertical-align: top;
+}
+
+nav li {
+    display: block;
+}
+
 .home_icon {
     margin: 10px;
 }
