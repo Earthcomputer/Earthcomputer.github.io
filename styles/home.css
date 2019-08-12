@@ -2,17 +2,19 @@ body {
     text-align: center;
 }
 
-nav {
-    display: inline-block;
-    vertical-align: top;
-}
-
-nav li {
-    display: block;
-}
-
 .home_icon {
     margin: 10px;
+}
+
+@media screen and (min-width: 720px) {
+    nav {
+        display: inline-block;
+        vertical-align: top;
+    }
+
+    nav li {
+        display: block;
+    }
 }
 
 @media screen and (orientation:landscape) {
