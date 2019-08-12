@@ -9,11 +9,41 @@ body {
 header {
     background-color: black;
     margin: 15px 0 15px 0;
+    padding: 5px;
 }
 
 footer {
     margin: 15px 0 15px 0;
     background-color: black;
+}
+
+nav ul {
+    list-style: none;
+    margin: 5px 0 0 0;
+    padding: 0;
+}
+
+nav li {
+    display: inline-block;
+    border: 1px solid darkgreen;
+    padding: 5px;
+    font-family: "Consolas", "Courier New", Courier, monospace;
+}
+
+nav a {
+    text-decoration: inherit;
+}
+
+nav a:link {
+    color: inherit;
+}
+
+nav a:visited {
+    color: inherit;
+}
+
+nav a:hover {
+    text-decoration: underline;
 }
 
 h1, h2, h3, h4, h5, h6 {
