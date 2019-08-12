@@ -125,6 +125,11 @@ ol ol, ul ol {
 
 .icon_container {
     vertical-align: middle;
+    display: inline-block;
+}
+
+.header_icon_container {
+    vertical-align: middle;
 }
 
 .title {
@@ -138,7 +143,7 @@ ol ol, ul ol {
         vertical-align: middle;
         text-align: left;
     }
-    .icon_container {
+    .header_icon_container {
         display: inline-block;
     }
 }
