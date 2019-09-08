@@ -3,3 +3,21 @@
 <link rel="icon" href="images/icon.png">
 <link rel="stylesheet" href="styles/reset.css">
 <link rel="stylesheet" href="styles/shared.css">
+{% if page.style %}
+{% if page.style.first %}
+{% for style in page.style %}
+<link rel="stylesheet" href="{{style}}">
+{% endfor %}
+{% else %}
+<link rel="stylesheet" href="{{page.style}}">
+{% endif %}
+{% endif %}
+{% if page.script %}
+{% if page.script.first %}
+{% for script in page.script %}
+<script type="text/javascript" src="{{script}}"></script>
+{% endfor %}
+{% else %}
+<script type="text/javascript" src="{{page.script}}"></script>
+{% endif %}
+{% endif %}

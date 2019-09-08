@@ -1,0 +1,10 @@
+
+.split {
+    display: flex;
+    flex-direction: row;
+}
+
+#output {
+    width: 100%;
+    height: 100%;
+}
