@@ -11,6 +11,7 @@
         <h3 class="monospace title">Earthcomputer's Website</h3>
         {% include navbar.html %}
     </header>
+    {% if page.title %}<h3 class="monospace">{{ page.title }}</h3>{% endif %}
     {{ content }}
     {% include footer.html %}
 </body>
