@@ -3,8 +3,8 @@
 const MIN_STATES = 3;
 const MAX_STATES = 8;
 let fsm_container;
-let colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'white', 'black', 'lime', 'aqua'];
-let foregroundColors = ['black', 'black', 'black', 'white', 'white', 'white', 'black', 'white', 'black', 'black'];
+let colors = ['red', 'cyan', 'blue', 'yellow', 'green', 'magenta', 'lime', 'brown', 'black', 'white'];
+let foregroundColors = ['black', 'black', 'white', 'black', 'white', 'black', 'white', 'black', 'white', 'black'];
 
 let makeArray = function(length) {
     let arr = new Array(length || 0), i = length;
