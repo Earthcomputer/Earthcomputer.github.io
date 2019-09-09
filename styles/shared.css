@@ -111,6 +111,23 @@ ol ol, ul ol {
     margin-left: 15px;
 }
 
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid white;
+    text-align: center;
+}
+
+th, td {
+    padding: 3px;
+}
+
+th {
+    font-weight: bold;
+}
+
 .monospace {
     font-family: "Consolas", "Courier New", Courier, monospace;
 }

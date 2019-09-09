@@ -5,6 +5,7 @@ const MAX_STATES = 8;
 let fsm_container;
 let colors = ['red', 'cyan', 'blue', 'yellow', 'green', 'magenta', 'lime', 'brown', 'black', 'white'];
 let foregroundColors = ['black', 'black', 'white', 'black', 'white', 'black', 'white', 'black', 'white', 'black'];
+let dirty = false;
 
 let makeArray = function(length) {
     let arr = new Array(length || 0), i = length;
@@ -29,6 +30,8 @@ window.setFsmValFromTextField = function(left, middle, right, output) {
     if (output < 0 || output > window.fsm.length)
         return;
     window.fsm[middle][left][right] = output;
+
+    dirty = true;
 };
 
 let addFsmState = function() {
@@ -78,13 +81,18 @@ let removeFsmState = function() {
 
 let simulate = function() {
     const CELL_SIZE = 16;
-    let width, maxHeight;
+    let widths, maxHeight;
     try {
-        width = parseInt(document.getElementById('width').value);
-        if (width < 1)
-            width = 1;
-        if (width > 1000)
-            width = 1000;
+        widths = document.getElementById('width').value.split(/\s*[\s,;]\s*/);
+        for (let i = 0; i < widths.length; i++) {
+            widths[i] = parseInt(widths[i]);
+            if (widths[i] < 1)
+                widths[i] = 1;
+            if (widths[i] > 1000)
+                widths[i] = 1000;
+        }
+        if (widths.length > 3)
+            widths = widths.slice(0, 3);
         maxHeight = parseInt(document.getElementById('height').value);
         if (maxHeight < 1)
             maxHeight = 1;
@@ -97,36 +105,43 @@ let simulate = function() {
     let ctx = canvas.getContext('2d');
     ctx.fillStyle = '#2b2525';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    let system = new Array(width);
-    system.fill(0);
-    system[0] = 1;
-    let nextSystem = new Array(width);
-    let y;
-    let stop = false;
-    for (y = 0; y < maxHeight && !stop; y++) {
-        for (let x = 0; x < width; x++) {
-            ctx.fillStyle = colors[system[x]];
-            ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            if (system[x] === window.fsm.length)
-                stop = true;
-            else
-                nextSystem[x] = window.fsm[system[x]][x === 0 ? window.fsm.length : system[x-1]][x === width - 1 ? window.fsm.length : system[x+1]];
+
+    let simX = 0;
+    for (let sim = 0; sim < widths.length; sim++) {
+        let width = widths[sim];
+        let system = new Array(width);
+        system.fill(0);
+        system[0] = 1;
+        let nextSystem = new Array(width);
+        let y;
+        let stop = false;
+        for (y = 0; y < maxHeight && !stop; y++) {
+            for (let x = 0; x < width; x++) {
+                ctx.fillStyle = colors[system[x]];
+                ctx.fillRect(simX + x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                if (system[x] === window.fsm.length)
+                    stop = true;
+                else
+                    nextSystem[x] = window.fsm[system[x]][x === 0 ? window.fsm.length : system[x - 1]][x === width - 1 ? window.fsm.length : system[x + 1]];
+            }
+            let tmp = system;
+            system = nextSystem;
+            nextSystem = tmp;
         }
-        let tmp = system;
-        system = nextSystem;
-        nextSystem = tmp;
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        for (let line = 0; line <= y; line++) {
+            ctx.moveTo(simX, line * CELL_SIZE);
+            ctx.lineTo(simX + width * CELL_SIZE, line * CELL_SIZE);
+        }
+        for (let line = 0; line <= width; line++) {
+            ctx.moveTo(simX + line * CELL_SIZE, 0);
+            ctx.lineTo(simX + line * CELL_SIZE, y * CELL_SIZE);
+        }
+        ctx.stroke();
+
+        simX += (width + 1) * CELL_SIZE;
     }
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    for (let line = 0; line <= y; line++) {
-        ctx.moveTo(0, line * CELL_SIZE);
-        ctx.lineTo(width * CELL_SIZE, line * CELL_SIZE);
-    }
-    for (let line = 0; line <= width; line++) {
-        ctx.moveTo(line * CELL_SIZE, 0);
-        ctx.lineTo(line * CELL_SIZE, y * CELL_SIZE);
-    }
-    ctx.stroke();
 };
 
 let loadFSM = function(fsm) {
@@ -184,7 +199,7 @@ let loadFSM = function(fsm) {
 
 let downloadFSM = function() {
     let data = JSON.stringify(window.fsm);
-    let file = new Blob([data], {type: 'application/json'})
+    let file = new Blob([data], {type: 'application/json'});
     if (window.navigator.msSaveOrOpenBlob)
         window.navigator.msSaveOrOpenBlob(file, 'fsm.json');
     else {
@@ -199,6 +214,7 @@ let downloadFSM = function() {
             window.URL.revokeObjectURL(url);
         }, 0);
     }
+    dirty = false;
 };
 
 window.onload = function() {
@@ -240,4 +256,12 @@ window.onload = function() {
     });
 
     loadFSM(window.fsm);
+
+    window.addEventListener('beforeunload', function (event) {
+        if (!dirty)
+            return undefined;
+        let message = 'Are you sure you want to close this page? You have unsaved changes that will be lost.';
+        (event || window.event).returnValue = message;
+        return message;
+    });
 };
