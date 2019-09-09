@@ -22,11 +22,18 @@ script:
     <div id="output_container">
         <canvas id="output"></canvas>
     </div>
-    <div id="fsm">
+    <div id="fsm_container">
+        <label>
+            Layout: <select id="fsm_layout">
+                <option value="matrix">Matrix</option>
+                <option value="list">List</option>
+            </select>
+        </label>
+        <div id="fsm"></div>
     </div>
 </div>
 <script type="text/javascript">
-    window.Split(['#output_container', '#fsm'], {
+    window.Split(['#output_container', '#fsm_container'], {
         sizes: [75, 25]
     });
 </script>

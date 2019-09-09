@@ -31,6 +31,8 @@ window.setFsmValFromTextField = function(left, middle, right, output) {
         return;
     window.fsm[middle][left][right] = output;
 
+    simulate();
+
     dirty = true;
 };
 
@@ -172,25 +174,63 @@ let loadFSM = function(fsm) {
     }
 
     window.fsm = fsm;
-    let html = '<table>' +
-        '<tr><th>Left</th><th>Middle</th><th>Right</th><th>Output</th></tr>';
-    for (let left = 0; left <= stateCount; left++) {
+    refreshHTML();
+};
+
+let refreshHTML = function() {
+    let stateCount = window.fsm.length;
+    let fsm_layout = document.getElementById('fsm_layout');
+    let html;
+    if (fsm_layout.value === 'matrix') {
+        html = '';
         for (let middle = 0; middle < stateCount; middle++) {
-            for (let right = 0; right <= stateCount; right++) {
-                html += '<tr>' +
-                    '<td style="background:' + (left === stateCount ? 'white' : colors[left]) + ';color:' + (left === stateCount ? 'black' : foregroundColors[left]) + '">' +
+            if (middle !== 0)
+                html += '<br/>';
+            html += '<table>' +
+                '<tr><th style="background:' + colors[middle] + ';color:' + foregroundColors[middle] + '">' + middle + '</th><th colspan="' + (stateCount + 2) + '">Right</th></tr>' +
+                '<tr><th rowspan="' + (stateCount + 2) + '">Left</th>' +
+                    '<th></th>';
+            for (let right = 0; right < stateCount; right++) {
+                html += '<td style="background:' + colors[right] + ';color:' + foregroundColors[right] + '">' + right + '</td>';
+            }
+            html += '<td style="background:white;color:black">x</td></tr>';
+            for (let left = 0; left <= stateCount; left++) {
+                html += '<tr>';
+                if (left === stateCount)
+                    html += '<td style="background:white;color:black">x</td>';
+                else
+                    html += '<td style="background:' + colors[left] + ';color:' + foregroundColors[left] + '">' + left + '</td>';
+                for (let right = 0; right <= stateCount; right++) {
+                    html += '<td><input type="number" min="0" max="' + stateCount + '" ' +
+                        'onchange="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
+                        'value="' + window.fsm[middle][left][right] + '" ' +
+                        'style="width:64px"></td>'
+                }
+                html += '</tr>';
+            }
+            html += '</table>';
+        }
+    } else if (fsm_layout.value === 'list') {
+        html = '<table>' +
+            '<tr><th>Left</th><th>Middle</th><th>Right</th><th>Output</th></tr>';
+        for (let left = 0; left <= stateCount; left++) {
+            for (let middle = 0; middle < stateCount; middle++) {
+                for (let right = 0; right <= stateCount; right++) {
+                    html += '<tr>' +
+                        '<td style="background:' + (left === stateCount ? 'white' : colors[left]) + ';color:' + (left === stateCount ? 'black' : foregroundColors[left]) + '">' +
                         (left === stateCount ? 'x' : left) + '</td>' +
-                    '<td style="background:' + colors[middle] + ';color:' + foregroundColors[middle] + '">' + middle + '</td>' +
-                    '<td style="background:' + (right === stateCount ? 'white' : colors[right]) + ';color:' + (right === stateCount ? 'black' : foregroundColors[right]) + '">' +
+                        '<td style="background:' + colors[middle] + ';color:' + foregroundColors[middle] + '">' + middle + '</td>' +
+                        '<td style="background:' + (right === stateCount ? 'white' : colors[right]) + ';color:' + (right === stateCount ? 'black' : foregroundColors[right]) + '">' +
                         (right === stateCount ? 'x' : right) + '</td>' +
-                    '<td><input type="number" min="0" max="' + stateCount + '" ' +
-                        'onchange="window.setFsmValFromTextField('+left+','+middle+','+right+',this.value)" ' +
-                    'value="' + window.fsm[middle][left][right] + '"></td>' +
-                    '</tr>';
+                        '<td><input type="number" min="0" max="' + stateCount + '" ' +
+                        'onchange="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
+                        'value="' + window.fsm[middle][left][right] + '"></td>' +
+                        '</tr>';
+                }
             }
         }
+        html += '</table>';
     }
-    html += '</table>';
     fsm_container.innerHTML = html;
     let canvas = document.getElementById('output');
     canvas.width = canvas.offsetWidth;
@@ -235,6 +275,11 @@ window.onload = function() {
             };
             reader.readAsText(file);
         }
+    });
+
+    let fsm_layout = document.getElementById('fsm_layout');
+    fsm_layout.addEventListener('change', function (event) {
+        refreshHTML();
     });
 
     let add_state = document.getElementById('add_state');
