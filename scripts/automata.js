@@ -4,8 +4,9 @@ const MIN_STATES = 3;
 const MAX_STATES = 8;
 let fsm_container;
 let colors = ['red', 'cyan', 'blue', 'yellow', 'green', 'magenta', 'lime', 'brown', 'black', 'white'];
-let foregroundColors = ['black', 'black', 'white', 'black', 'white', 'black', 'white', 'black', 'white', 'black'];
+let foregroundColors = ['white', 'black', 'white', 'black', 'white', 'black', 'white', 'black', 'white', 'black'];
 let dirty = false;
+window.focusedRule = null;
 
 let makeArray = function(length) {
     let arr = new Array(length || 0), i = length;
@@ -117,10 +118,29 @@ let simulate = function() {
                 if (grid[y][x] !== -1) {
                     ctx.fillStyle = colors[grid[y][x]];
                     ctx.fillRect(simX + x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+                    if (y !== 0 && window.focusedRule && window.focusedRule.left === (x === 0 ? -1 : grid[y-1][x-1]) && window.focusedRule.middle === grid[y-1][x] && window.focusedRule.right === (x === width - 1 ? -1 : grid[y-1][x+1])) {
+                        if (x !== 0) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = foregroundColors[grid[y-1][x-1]];
+                            ctx.rect(simX + (x-1) * CELL_SIZE + 2, (y-1) * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+                            ctx.stroke();
+                        }
+                        ctx.beginPath();
+                        ctx.strokeStyle = foregroundColors[grid[y-1][x]];
+                        ctx.rect(simX + x * CELL_SIZE + 2, (y-1) * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+                        ctx.stroke();
+                        if (x !== width - 1) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = foregroundColors[grid[y-1][x+1]];
+                            ctx.rect(simX + (x+1) * CELL_SIZE + 2, (y-1) * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+                            ctx.stroke();
+                        }
+                    }
                 }
             }
         }
-        ctx.fillStyle = 'black';
+        ctx.strokeStyle = 'black';
         ctx.beginPath();
         for (let line = 0; line <= grid.length; line++) {
             ctx.moveTo(simX, line * CELL_SIZE);
@@ -232,6 +252,8 @@ let refreshHTML = function() {
                 for (let right = 0; right <= stateCount; right++) {
                     html += '<td><input type="number" min="0" max="' + stateCount + '" ' +
                         'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
+                        'onfocus="window.focusedRule = {left: ' + left + ', middle: ' + middle + ', right: ' + right + '}; simulate();" ' +
+                        'onblur="window.focusedRule = null; simulate();" ' +
                         'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '" ' +
                         'style="width:64px"></td>'
                 }
@@ -253,6 +275,8 @@ let refreshHTML = function() {
                         (right === stateCount ? 'x' : right) + '</td>' +
                         '<td><input type="number" min="0" max="' + stateCount + '" ' +
                         'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
+                        'onfocus="window.focusedRule = {left: ' + left + ', middle: ' + middle + ', right: ' + right + '}; simulate();" ' +
+                        'onblur="window.focusedRule = null; simulate();" ' +
                         'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '"></td>' +
                         '</tr>';
                 }
