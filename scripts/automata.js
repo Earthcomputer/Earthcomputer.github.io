@@ -286,7 +286,7 @@ let downloadFSM = function() {
     dirty = false;
 };
 
-let removeRedundantStates = function() {
+let removeRedundantRules = function() {
     let ruleUsed = makeArray(window.fsm.length, window.fsm.length+1, window.fsm.length+1);
     for (let width = 2; width <= 32; width++) {
         doSimulate(width, function(left, middle, right) {
@@ -352,7 +352,7 @@ window.onload = function() {
 
     let removeRedundantStatesBtn = document.getElementById('remove_redundant');
     removeRedundantStatesBtn.addEventListener('click', function(event) {
-        removeRedundantStates();
+        removeRedundantRules();
     });
 
     loadFSM(window.fsm);
