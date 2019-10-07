@@ -7,17 +7,23 @@ script:
   - scripts/automata.js
 ---
 
-<p>
+<fieldset>
+    <legend>I/O</legend>
     Upload FSM: <input type="file" id="upload">
     Download FSM: <button id="download">Download</button>
-</p>
-<p>
+</fieldset>
+<fieldset>
+    <legend>Tools</legend>
+    <button id="remove_redundant">Remove Redundant States</button>
+</fieldset>
+<fieldset>
+    <legend>Simulation</legend>
     <label>Width(s): <input type="text" min="1" id="width" value="16"></label>
     <label>Height: <input type="number" min="1" id="height" value="100"></label>
     <button id="add_state">Add State</button>
     <button id="remove_state">Remove State</button>
     <button id="simulate">Simulate</button>
-</p>
+</fieldset>
 <div class="split">
     <div id="output_container">
         <canvas id="output"></canvas>

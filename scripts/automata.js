@@ -22,13 +22,17 @@ let makeArray = function(length) {
 window.fsm = makeArray(MIN_STATES, MIN_STATES+1, MIN_STATES+1);
 
 window.setFsmValFromTextField = function(left, middle, right, output) {
-    try {
-        output = parseInt(output);
-    } catch (err) {
-        return;
+    if (output === '') {
+        output = -1;
+    } else {
+        try {
+            output = parseInt(output);
+        } catch (err) {
+            return;
+        }
+        if (output < 0 || output > window.fsm.length)
+            return;
     }
-    if (output < 0 || output > window.fsm.length)
-        return;
     window.fsm[middle][left][right] = output;
 
     simulate();
@@ -83,7 +87,7 @@ let removeFsmState = function() {
 
 let simulate = function() {
     const CELL_SIZE = 16;
-    let widths, maxHeight;
+    let widths;
     try {
         widths = document.getElementById('width').value.split(/\s*[\s,;]\s*/);
         for (let i = 0; i < widths.length; i++) {
@@ -95,11 +99,6 @@ let simulate = function() {
         }
         if (widths.length > 3)
             widths = widths.slice(0, 3);
-        maxHeight = parseInt(document.getElementById('height').value);
-        if (maxHeight < 1)
-            maxHeight = 1;
-        if (maxHeight > 1000)
-            maxHeight = 1000;
     } catch (err) {
         return;
     }
@@ -111,39 +110,69 @@ let simulate = function() {
     let simX = 0;
     for (let sim = 0; sim < widths.length; sim++) {
         let width = widths[sim];
-        let system = new Array(width);
-        system.fill(0);
-        system[0] = 1;
-        let nextSystem = new Array(width);
-        let y;
-        let stop = false;
-        for (y = 0; y < maxHeight && !stop; y++) {
+        let grid = doSimulate(width, applyRule);
+
+        for (let y = 0; y < grid.length; y++) {
             for (let x = 0; x < width; x++) {
-                ctx.fillStyle = colors[system[x]];
-                ctx.fillRect(simX + x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                if (system[x] === window.fsm.length)
-                    stop = true;
-                else
-                    nextSystem[x] = window.fsm[system[x]][x === 0 ? window.fsm.length : system[x - 1]][x === width - 1 ? window.fsm.length : system[x + 1]];
+                if (grid[y][x] !== -1) {
+                    ctx.fillStyle = colors[grid[y][x]];
+                    ctx.fillRect(simX + x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
             }
-            let tmp = system;
-            system = nextSystem;
-            nextSystem = tmp;
         }
         ctx.fillStyle = 'black';
         ctx.beginPath();
-        for (let line = 0; line <= y; line++) {
+        for (let line = 0; line <= grid.length; line++) {
             ctx.moveTo(simX, line * CELL_SIZE);
             ctx.lineTo(simX + width * CELL_SIZE, line * CELL_SIZE);
         }
         for (let line = 0; line <= width; line++) {
             ctx.moveTo(simX + line * CELL_SIZE, 0);
-            ctx.lineTo(simX + line * CELL_SIZE, y * CELL_SIZE);
+            ctx.lineTo(simX + line * CELL_SIZE, grid.length * CELL_SIZE);
         }
         ctx.stroke();
 
         simX += (width + 1) * CELL_SIZE;
     }
+};
+
+let applyRule = function(left, middle, right) {
+    return window.fsm[middle][left][right];
+};
+
+let doSimulate = function(width, ruleFunction) {
+    let maxHeight;
+    try {
+        maxHeight = parseInt(document.getElementById('height').value);
+        if (maxHeight < 1)
+            maxHeight = 1;
+        if (maxHeight > 1000)
+            maxHeight = 1000;
+    } catch (err) {
+        return [];
+    }
+
+    let grid = [];
+    let system = new Array(width);
+    system.fill(0);
+    system[0] = 1;
+    grid.push(system);
+
+    for (let y = 0; y < maxHeight; y++) {
+        system = new Array(width);
+        let stop = false;
+        for (let x = 0; x < width; x++) {
+            let val = ruleFunction(x === 0 ? window.fsm.length : grid[y][x-1], grid[y][x], x === width - 1 ? window.fsm.length : grid[y][x+1]);
+            system[x] = val;
+            if (val === window.fsm.length || val === -1)
+                stop = true;
+        }
+        grid.push(system);
+        if (stop)
+            break;
+    }
+
+    return grid;
 };
 
 let loadFSM = function(fsm) {
@@ -167,7 +196,7 @@ let loadFSM = function(fsm) {
                     throw new SyntaxError('Expected number');
                 if (!Number.isInteger(fsm[middle][left][right]))
                     throw new SyntaxError('Expected integer');
-                if (fsm[middle][left][right] < 0 || fsm[middle][left][right] >= stateCount + 1)
+                if (fsm[middle][left][right] < -1 || fsm[middle][left][right] >= stateCount + 1)
                     throw new SyntaxError('Invalid dest state');
             }
         }
@@ -202,8 +231,8 @@ let refreshHTML = function() {
                     html += '<td style="background:' + colors[left] + ';color:' + foregroundColors[left] + '">' + left + '</td>';
                 for (let right = 0; right <= stateCount; right++) {
                     html += '<td><input type="number" min="0" max="' + stateCount + '" ' +
-                        'onchange="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
-                        'value="' + window.fsm[middle][left][right] + '" ' +
+                        'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
+                        'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '" ' +
                         'style="width:64px"></td>'
                 }
                 html += '</tr>';
@@ -223,8 +252,8 @@ let refreshHTML = function() {
                         '<td style="background:' + (right === stateCount ? 'white' : colors[right]) + ';color:' + (right === stateCount ? 'black' : foregroundColors[right]) + '">' +
                         (right === stateCount ? 'x' : right) + '</td>' +
                         '<td><input type="number" min="0" max="' + stateCount + '" ' +
-                        'onchange="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
-                        'value="' + window.fsm[middle][left][right] + '"></td>' +
+                        'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
+                        'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '"></td>' +
                         '</tr>';
                 }
             }
@@ -255,6 +284,27 @@ let downloadFSM = function() {
         }, 0);
     }
     dirty = false;
+};
+
+let removeRedundantStates = function() {
+    let ruleUsed = makeArray(window.fsm.length, window.fsm.length+1, window.fsm.length+1);
+    for (let width = 2; width <= 32; width++) {
+        doSimulate(width, function(left, middle, right) {
+            ruleUsed[middle][left][right] = true;
+            return applyRule(left, middle, right);
+        });
+    }
+    for (let middle = 0; middle < window.fsm.length; middle++) {
+        for (let left = 0; left <= window.fsm.length; left++) {
+            for (let right = 0; right <= window.fsm.length; right++) {
+                if (!ruleUsed[middle][left][right]) {
+                    window.fsm[middle][left][right] = -1;
+                    dirty = true;
+                }
+            }
+        }
+    }
+    refreshHTML();
 };
 
 window.onload = function() {
@@ -298,6 +348,11 @@ window.onload = function() {
     let downloadBtn = document.getElementById('download');
     downloadBtn.addEventListener('click', function (event) {
         downloadFSM();
+    });
+
+    let removeRedundantStatesBtn = document.getElementById('remove_redundant');
+    removeRedundantStatesBtn.addEventListener('click', function(event) {
+        removeRedundantStates();
     });
 
     loadFSM(window.fsm);

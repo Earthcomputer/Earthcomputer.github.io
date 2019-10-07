@@ -129,6 +129,17 @@ th {
     font-weight: bold;
 }
 
+fieldset {
+    margin: 5px;
+    padding: 5px;
+    border: solid darkcyan;
+}
+
+legend {
+    font-family: "Consolas", "Courier New", Courier, monospace;
+    color: green;
+}
+
 .monospace {
     font-family: "Consolas", "Courier New", Courier, monospace;
 }
