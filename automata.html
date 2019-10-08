@@ -4,6 +4,7 @@ title: Automata
 style: styles/automata.css
 script:
   - https://cdnjs.cloudflare.com/ajax/libs/split.js/1.5.11/split.min.js
+  - https://raw.githubusercontent.com/gpujs/gpu.js/develop/dist/gpu-browser.min.js
   - scripts/automata.js
 ---
 
@@ -14,14 +15,15 @@ script:
 </fieldset>
 <fieldset>
     <legend>Tools</legend>
+    <button id="add_state">Add State</button>
+    <button id="remove_state">Remove State</button>
     <button id="remove_redundant">Remove Redundant Rules</button>
+    <button id="remove_failed">Remove Failed Rules</button>
 </fieldset>
 <fieldset>
     <legend>Simulation</legend>
     <label>Width(s): <input type="text" min="1" id="width" value="16"></label>
     <label>Height: <input type="number" min="1" id="height" value="100"></label>
-    <button id="add_state">Add State</button>
-    <button id="remove_state">Remove State</button>
     <button id="simulate">Simulate</button>
 </fieldset>
 <div class="split">

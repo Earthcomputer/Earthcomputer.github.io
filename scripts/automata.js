@@ -310,13 +310,30 @@ let downloadFSM = function() {
     dirty = false;
 };
 
-let removeRedundantRules = function() {
+let removeRedundantRules = function(acceptingOnly) {
     let ruleUsed = makeArray(window.fsm.length, window.fsm.length+1, window.fsm.length+1);
     for (let width = 2; width <= 32; width++) {
-        doSimulate(width, function(left, middle, right) {
-            ruleUsed[middle][left][right] = true;
+        let ruleUsedThisWidth = makeArray(window.fsm.length, window.fsm.length+1, window.fsm.length+1);
+        let grid = doSimulate(width, function(left, middle, right) {
+            ruleUsedThisWidth[middle][left][right] = true;
             return applyRule(left, middle, right);
         });
+        let accepting = true;
+        for (let x = 0; x < width; x++) {
+            if (grid[grid.length - 1][x] !== window.fsm.length) {
+                accepting = false;
+                break;
+            }
+        }
+        if (accepting || !acceptingOnly) {
+            for (let middle = 0; middle < window.fsm.length; middle++) {
+                for (let left = 0; left <= window.fsm.length; left++) {
+                    for (let right = 0; right <= window.fsm.length; right++) {
+                        ruleUsed[middle][left][right] |= ruleUsedThisWidth[middle][left][right];
+                    }
+                }
+            }
+        }
     }
     for (let middle = 0; middle < window.fsm.length; middle++) {
         for (let left = 0; left <= window.fsm.length; left++) {
@@ -374,9 +391,14 @@ window.onload = function() {
         downloadFSM();
     });
 
-    let removeRedundantStatesBtn = document.getElementById('remove_redundant');
-    removeRedundantStatesBtn.addEventListener('click', function(event) {
-        removeRedundantRules();
+    let removeRedundantRulesBtn = document.getElementById('remove_redundant');
+    removeRedundantRulesBtn.addEventListener('click', function(event) {
+        removeRedundantRules(false);
+    });
+
+    let removeFailedRulesBtn = document.getElementById('remove_failed');
+    removeFailedRulesBtn.addEventListener('click', function (event) {
+        removeRedundantRules(true);
     });
 
     loadFSM(window.fsm);
