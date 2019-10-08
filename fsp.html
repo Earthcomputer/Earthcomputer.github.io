@@ -1,16 +1,35 @@
 ---
 layout: page
-title: Automata
-style: styles/automata.css
+title: Firing Squad Problem
+style: styles/fsp.css
 script:
   - https://cdnjs.cloudflare.com/ajax/libs/split.js/1.5.11/split.min.js
-  - scripts/automata.js
+  - scripts/fsp.js
 ---
+
+<div class="indent">
+<h4>Problem Description</h4>
+<p>
+The Firing Squad Problem (FSP) is about designing a 1D <a href="https://en.wikipedia.org/wiki/Cellular_automaton">cellular automaton</a>,
+with <i>n</i> possible states for each cell, such that all cells will end up in the same state, having never been in that state before.
+Each cell follows the same set of rules (the "automaton"), which take the previous state of itself and its two neighbors, and outputs
+the next state for that cell. For cells at the edge, their neighbor is a special "null" state, which does not count to <i>n</i>.
+</p>
+<p>
+A 6-state solution exists for all possible widths. It has been proven that there is no single 4-state solution for all possible widths,
+although 4-state solutions exist for powers of 2. It is unknown whether there is a single 5-state solution that works for all widths.
+</p>
+</div>
+
+<fieldset>
+    <legend>Presets</legend>
+    <button id="load_4_state">Load 4-state solution</button>
+</fieldset>
 
 <fieldset>
     <legend>I/O</legend>
-    Upload FSM: <input type="file" id="upload">
-    Download FSM: <button id="download">Download</button>
+    Upload Automaton: <input type="file" id="upload">
+    Download Automaton: <button id="download">Download</button>
 </fieldset>
 <fieldset>
     <legend>Tools</legend>

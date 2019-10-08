@@ -218,6 +218,8 @@ let loadFSM = function(fsm) {
                     throw new SyntaxError('Expected integer');
                 if (fsm[middle][left][right] < -1 || fsm[middle][left][right] >= stateCount + 1)
                     throw new SyntaxError('Invalid dest state');
+                if (middle === 0 && left === 0 && right === 0 && fsm[middle][left][right] > 0)
+                    throw new SyntaxError('Invalid dest state');
             }
         }
     }
@@ -250,12 +252,16 @@ let refreshHTML = function() {
                 else
                     html += '<td style="background:' + colors[left] + ';color:' + foregroundColors[left] + '">' + left + '</td>';
                 for (let right = 0; right <= stateCount; right++) {
-                    html += '<td><input type="number" min="0" max="' + stateCount + '" ' +
-                        'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
-                        'onfocus="window.focusedRule = {left: ' + left + ', middle: ' + middle + ', right: ' + right + '}; simulate();" ' +
-                        'onblur="window.focusedRule = null; simulate();" ' +
-                        'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '" ' +
-                        'style="width:64px"></td>'
+                    html += '<td>';
+                    if (middle !== 0 || left !== 0 || right !== 0) {
+                        html += '<input type="number" min="0" max="' + stateCount + '" ' +
+                            'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
+                            'onfocus="window.focusedRule = {left: ' + left + ', middle: ' + middle + ', right: ' + right + '}; simulate();" ' +
+                            'onblur="window.focusedRule = null; simulate();" ' +
+                            'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '" ' +
+                            'style="width:64px">';
+                    }
+                    html += '</td>'
                 }
                 html += '</tr>';
             }
@@ -273,11 +279,15 @@ let refreshHTML = function() {
                         '<td style="background:' + colors[middle] + ';color:' + foregroundColors[middle] + '">' + middle + '</td>' +
                         '<td style="background:' + (right === stateCount ? 'white' : colors[right]) + ';color:' + (right === stateCount ? 'black' : foregroundColors[right]) + '">' +
                         (right === stateCount ? 'x' : right) + '</td>' +
-                        '<td><input type="number" min="0" max="' + stateCount + '" ' +
-                        'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
-                        'onfocus="window.focusedRule = {left: ' + left + ', middle: ' + middle + ', right: ' + right + '}; simulate();" ' +
-                        'onblur="window.focusedRule = null; simulate();" ' +
-                        'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '"></td>' +
+                        '<td>';
+                    if (middle !== 0 || left !== 0 || right !== 0) {
+                        html += '<input type="number" min="0" max="' + stateCount + '" ' +
+                            'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
+                            'onfocus="window.focusedRule = {left: ' + left + ', middle: ' + middle + ', right: ' + right + '}; simulate();" ' +
+                            'onblur="window.focusedRule = null; simulate();" ' +
+                            'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '">';
+                    }
+                    html += '</td>' +
                         '</tr>';
                 }
             }
@@ -335,6 +345,7 @@ let removeRedundantRules = function(acceptingOnly) {
             }
         }
     }
+    ruleUsed[0][0][0] = true;
     for (let middle = 0; middle < window.fsm.length; middle++) {
         for (let left = 0; left <= window.fsm.length; left++) {
             for (let right = 0; right <= window.fsm.length; right++) {
@@ -371,6 +382,13 @@ window.onload = function() {
     let fsm_layout = document.getElementById('fsm_layout');
     fsm_layout.addEventListener('change', function (event) {
         refreshHTML();
+    });
+
+    let load4StateBtn = document.getElementById('load_4_state');
+    load4StateBtn.addEventListener('click', function (event) {
+        window.fsm = [[[0,0,2,0],[1,1,0,1],[0,0,2,0],[0,0,0,0]],[[1,1,2,3],[0,0,2,2],[1,1,3,3],[1,1,3,0]],[[2,2,0,2],[0,3,1,3],[2,2,0,2],[0,0,0,0]]];
+        refreshHTML();
+        simulate();
     });
 
     let add_state = document.getElementById('add_state');
