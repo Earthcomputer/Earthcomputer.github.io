@@ -357,6 +357,34 @@ let removeRedundantRules = function(acceptingOnly) {
         }
     }
     refreshHTML();
+    simulate();
+};
+
+let makeSymmetrical = function() {
+    let conflicts = [];
+    for (let middle = 0; middle < window.fsm.length; middle++) {
+        for (let right = 0; right <= window.fsm.length; right++) {
+            for (let left = 0; left <= window.fsm.length; left++) {
+                if (window.fsm[middle][left][right] === -1) {
+                    if (window.fsm[middle][right][left] !== -1)
+                        dirty = true;
+                    window.fsm[middle][left][right] = window.fsm[middle][right][left];
+                }
+                if (left < right && window.fsm[middle][left][right] !== window.fsm[middle][right][left])
+                    conflicts.push({left: left, middle: middle, right: right});
+            }
+        }
+    }
+    if (conflicts.length !== 0) {
+        let message = 'Conflicts found, cannot make entirely symmetrical!';
+        for (let i = 0; i < Math.min(5, conflicts.length); i++)
+            message += '\n- (' + conflicts[i].left + ', ' + conflicts[i].middle + ', ' + conflicts[i].right + ') and (' + conflicts[i].right + ', ' + conflicts[i].middle + ', ' + conflicts[i].left + ')';
+        if (conflicts.length > 5)
+            message += '\n... ' + (conflicts.length - 5) + ' more';
+        alert(message);
+    }
+    refreshHTML();
+    simulate();
 };
 
 window.onload = function() {
@@ -407,6 +435,11 @@ window.onload = function() {
     let downloadBtn = document.getElementById('download');
     downloadBtn.addEventListener('click', function (event) {
         downloadFSM();
+    });
+
+    let makeSymmetricalBtn = document.getElementById('make_symmetrical');
+    makeSymmetricalBtn.addEventListener('click', function (event) {
+        makeSymmetrical();
     });
 
     let removeRedundantRulesBtn = document.getElementById('remove_redundant');
