@@ -119,7 +119,7 @@ let simulate = function() {
                     ctx.fillStyle = colors[grid[y][x]];
                     ctx.fillRect(simX + x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
-                    if (y !== 0 && window.focusedRule && window.focusedRule.left === (x === 0 ? -1 : grid[y-1][x-1]) && window.focusedRule.middle === grid[y-1][x] && window.focusedRule.right === (x === width - 1 ? -1 : grid[y-1][x+1])) {
+                    if (y !== 0 && window.focusedRule && window.focusedRule.left === (x === 0 ? window.fsm.length : grid[y-1][x-1]) && window.focusedRule.middle === grid[y-1][x] && window.focusedRule.right === (x === width - 1 ? window.fsm.length : grid[y-1][x+1])) {
                         if (x !== 0) {
                             ctx.beginPath();
                             ctx.strokeStyle = foregroundColors[grid[y-1][x-1]];
