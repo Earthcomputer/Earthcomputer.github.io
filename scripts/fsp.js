@@ -2,6 +2,7 @@
 
 const MIN_STATES = 3;
 const MAX_STATES = 8;
+const SIMULATIONS_LIMIT = 5;
 let fsm_container;
 let colors = ['red', 'cyan', 'blue', 'yellow', 'green', 'magenta', 'lime', 'brown', 'black', 'white'];
 let foregroundColors = ['white', 'black', 'white', 'black', 'white', 'black', 'white', 'black', 'white', 'black'];
@@ -98,8 +99,8 @@ let simulate = function() {
             if (widths[i] > 1000)
                 widths[i] = 1000;
         }
-        if (widths.length > 3)
-            widths = widths.slice(0, 3);
+        if (widths.length > SIMULATIONS_LIMIT)
+            widths = widths.slice(0, SIMULATIONS_LIMIT);
     } catch (err) {
         return;
     }
