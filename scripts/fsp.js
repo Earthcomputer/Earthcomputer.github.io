@@ -260,6 +260,8 @@ let refreshHTML = function() {
                             'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '" ' +
                             'id="fsm_' + left + '_' + middle + '_' + right + '" ' +
                             'style="width:64px">';
+                    } else {
+                        html += "0";
                     }
                     html += '</td>'
                 }
@@ -284,6 +286,8 @@ let refreshHTML = function() {
                         html += '<input type="number" min="0" max="' + stateCount + '" ' +
                             'id="fsm_' + left + '_' + middle + '_' + right + '" ' +
                             'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '">';
+                    } else {
+                        html += "0";
                     }
                     html += '</td>' +
                         '</tr>';
