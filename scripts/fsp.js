@@ -7,7 +7,7 @@ let fsm_container;
 let colors = ['red', 'cyan', 'blue', 'yellow', 'green', 'magenta', 'lime', 'brown', 'black', 'white'];
 let foregroundColors = ['white', 'black', 'white', 'black', 'white', 'black', 'white', 'black', 'white', 'black'];
 let dirty = false;
-window.focusedRule = null;
+let focusedRule = null;
 
 let makeArray = function(length) {
     let arr = new Array(length || 0), i = length;
@@ -23,7 +23,7 @@ let makeArray = function(length) {
 
 window.fsm = makeArray(MIN_STATES, MIN_STATES+1, MIN_STATES+1);
 
-window.setFsmValFromTextField = function(left, middle, right, output) {
+let setFsmValFromTextField = function(left, middle, right, output) {
     if (output === '') {
         output = -1;
     } else {
@@ -120,7 +120,7 @@ let simulate = function() {
                     ctx.fillStyle = colors[grid[y][x]];
                     ctx.fillRect(simX + x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
-                    if (y !== 0 && window.focusedRule && window.focusedRule.left === (x === 0 ? window.fsm.length : grid[y-1][x-1]) && window.focusedRule.middle === grid[y-1][x] && window.focusedRule.right === (x === width - 1 ? window.fsm.length : grid[y-1][x+1])) {
+                    if (y !== 0 && focusedRule && focusedRule.left === (x === 0 ? window.fsm.length : grid[y-1][x-1]) && focusedRule.middle === grid[y-1][x] && focusedRule.right === (x === width - 1 ? window.fsm.length : grid[y-1][x+1])) {
                         if (x !== 0) {
                             ctx.beginPath();
                             ctx.strokeStyle = foregroundColors[grid[y-1][x-1]];
@@ -257,10 +257,8 @@ let refreshHTML = function() {
                     html += '<td>';
                     if (middle !== 0 || left !== 0 || right !== 0) {
                         html += '<input type="number" min="0" max="' + stateCount + '" ' +
-                            'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
-                            'onfocus="window.focusedRule = {left: ' + left + ', middle: ' + middle + ', right: ' + right + '}; simulate();" ' +
-                            'onblur="window.focusedRule = null; simulate();" ' +
                             'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '" ' +
+                            'id="fsm_' + left + '_' + middle + '_' + right + '" ' +
                             'style="width:64px">';
                     }
                     html += '</td>'
@@ -284,9 +282,7 @@ let refreshHTML = function() {
                         '<td>';
                     if (middle !== 0 || left !== 0 || right !== 0) {
                         html += '<input type="number" min="0" max="' + stateCount + '" ' +
-                            'oninput="window.setFsmValFromTextField(' + left + ',' + middle + ',' + right + ',this.value)" ' +
-                            'onfocus="window.focusedRule = {left: ' + left + ', middle: ' + middle + ', right: ' + right + '}; simulate();" ' +
-                            'onblur="window.focusedRule = null; simulate();" ' +
+                            'id="fsm_' + left + '_' + middle + '_' + right + '" ' +
                             'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '">';
                     }
                     html += '</td>' +
@@ -297,6 +293,30 @@ let refreshHTML = function() {
         html += '</table>';
     }
     fsm_container.innerHTML = html;
+    for (let middle = 0; middle < stateCount; middle++) {
+        for (let left = 0; left <= stateCount; left++) {
+            for (let right = 0; right <= stateCount; right++) {
+                if (middle === 0 && left === 0 && right === 0) continue;
+
+                let input = document.getElementById('fsm_' + left + '_' + middle + '_' + right);
+                input.addEventListener('input', function (event) {
+                    setFsmValFromTextField(left, middle, right, input.value);
+                    if (left !== right && document.getElementById('lock_symmetrical').checked) {
+                        document.getElementById('fsm_' + right + '_' + middle + '_' + left).value = input.value;
+                        setFsmValFromTextField(right, middle, left, input.value);
+                    }
+                });
+                input.addEventListener('focus', function (event) {
+                    focusedRule = {left: left, middle: middle, right: right};
+                    simulate();
+                });
+                input.addEventListener('blur', function (event) {
+                    focusedRule = null;
+                    simulate();
+                });
+            }
+        }
+    }
     let canvas = document.getElementById('output');
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
