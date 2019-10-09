@@ -171,11 +171,12 @@ let doSimulate = function(width, ruleFunction) {
     } catch (err) {
         return [];
     }
+    let general_pos = document.getElementById('general_pos').value;
 
     let grid = [];
     let system = new Array(width);
     system.fill(0);
-    system[0] = 1;
+    system[general_pos === 'left' ? 0 : width - 1] = 1;
     grid.push(system);
 
     for (let y = 0; y < maxHeight; y++) {
@@ -410,6 +411,11 @@ window.onload = function() {
     let fsm_layout = document.getElementById('fsm_layout');
     fsm_layout.addEventListener('change', function (event) {
         refreshHTML();
+    });
+
+    let general_pos = document.getElementById('general_pos');
+    general_pos.addEventListener('change', function (event) {
+        simulate();
     });
 
     let load4StateBtn = document.getElementById('load_4_state');
