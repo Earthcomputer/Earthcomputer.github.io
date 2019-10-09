@@ -3,6 +3,7 @@
 const MIN_STATES = 3;
 const MAX_STATES = 8;
 const SIMULATIONS_LIMIT = 5;
+const CELL_SIZE = 16;
 let fsm_container;
 let colors = ['red', 'cyan', 'blue', 'yellow', 'green', 'magenta', 'lime', 'brown', 'black', 'white'];
 let foregroundColors = ['white', 'black', 'white', 'black', 'white', 'black', 'white', 'black', 'white', 'black'];
@@ -88,7 +89,6 @@ let removeFsmState = function() {
 };
 
 let simulate = function() {
-    const CELL_SIZE = 16;
     let widths;
     try {
         widths = document.getElementById('width').value.split(/\s*[\s,;]\s*/);
@@ -105,6 +105,17 @@ let simulate = function() {
         return;
     }
     let canvas = document.getElementById('output');
+
+    let totalWidth = (widths.length - 1) * CELL_SIZE + 1;
+    for (let i = 0; i < widths.length; i++)
+        totalWidth += widths[i] * CELL_SIZE;
+    let totalHeight = 1;
+    for (let i = 0; i < widths.length; i++)
+        totalHeight = Math.max(totalHeight, doSimulate(widths[i], applyRule).length * CELL_SIZE);
+    canvas.setAttribute('style', 'width: ' + totalWidth + 'px; height: ' + totalHeight + 'px;');
+    canvas.width = totalWidth;
+    canvas.height = totalHeight;
+
     let ctx = canvas.getContext('2d');
     ctx.fillStyle = '#2b2525';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -321,9 +332,6 @@ let refreshHTML = function() {
             }
         }
     }
-    let canvas = document.getElementById('output');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
 };
 
 let downloadFSM = function() {
