@@ -83,6 +83,11 @@ i {
     font-style: italic;
 }
 
+sup {
+    font-size: 83%;
+    vertical-align: super;
+}
+
 a:link {
     color: #2f72ff
 }
