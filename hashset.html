@@ -1,0 +1,66 @@
+---
+layout: page
+title: Java HashSet Visualizer
+style: styles/visualizer.css
+script:
+  - https://cdnjs.cloudflare.com/ajax/libs/split.js/1.5.11/split.min.js
+  - https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ace.js
+  - scripts/hashset.js
+---
+
+<div class="split">
+    <div id="output_container">
+        <div id="output_viewport">
+            <canvas id="output"></canvas>
+        </div>
+    </div>
+    <div id="input_container">
+        <fieldset>
+            <legend>Operations</legend>
+            <label>Value:<input type="text" id="value"></label><br/><br/>
+            <button id="add">Add</button>
+            <button id="remove">Remove</button>
+            <button id="contains">Contains</button>
+            <button id="iterator">Iterator</button>
+            <button id="clear">Clear</button>
+        </fieldset>
+        <fieldset>
+            <legend>Output</legend>
+            <span class="monospace">=> <span id="text_output"></span></span>
+        </fieldset>
+        <fieldset>
+            <legend>Code</legend>
+            <span class="monospace">equals(a, b)</span>
+            <div id="equals">return a === b;</div><br/>
+            <span class="monospace">hashCode(a)</span>
+            <div id="hashCode">let h = 0;
+for (let i = 0; i < a.length; i++)
+    h = (Math.imul(31, h) + a.charCodeAt(i)) & 0xffffffff;
+return h;</div><br/>
+            <span class="monospace">compareTo(a, b)</span>
+            <div id="compareTo">if (a < b)
+    return -1;
+else if (a > b)
+    return 1;
+else
+    return 0;</div>
+            <script type="text/javascript">
+                let createEditor = function(id) {
+                    let editor = ace.edit(id);
+                    editor.setTheme("ace/theme/monokai");
+                    editor.session.setMode("ace/mode/javascript");
+                    editor.setOption('maxLines', 20);
+                    return editor;
+                };
+                window.equalsEditor = createEditor('equals');
+                window.hashCodeEditor = createEditor('hashCode');
+                window.compareToEditor = createEditor('compareTo');
+            </script>
+        </fieldset>
+    </div>
+</div>
+<script type="text/javascript">
+    window.Split(['#output_container', '#input_container'], {
+        sizes: [75, 25]
+    });
+</script>
