@@ -671,11 +671,34 @@ let getFontHeight = function(ctx) {
     return result;
 };
 
+let getLinesForNode = function(node) {
+    let value = node.value;
+    try {
+        value = JSON.parse(value);
+        if (typeof(value) !== 'object' || !value)
+            value = node.value;
+        else {
+            let props = Object.keys(value);
+            props.sort();
+            for (let i = 0; i < props.length; i++)
+                props[i] += ': ' + value[props[i]];
+            value = props.join('\n');
+        }
+    } catch (err) {
+        value = node.value;
+    }
+    return value.split('\n');
+};
+
 let getNodeMetrics = function(ctx, node) {
+    let lines = getLinesForNode(node);
     ctx.font = NORMAL_FONT;
     ctx.fillStyle = NORMAL_STYLE;
-    let width = ctx.measureText(node.value.replace('\n', '\\n')).width + 4;
-    let height = getFontHeight(ctx);
+    let width = 0, height = 0;
+    for (let i = 0; i < lines.length; i++) {
+        width = Math.max(width, ctx.measureText(lines[i]).width + 4);
+        height += getFontHeight(ctx);
+    }
     ctx.font = HASH_FONT;
     ctx.fillStyle = HASH_STYLE;
     width = Math.max(width, ctx.measureText('hash=' + node.h).width + 4);
@@ -798,13 +821,19 @@ let getHashSetMetrics = function(ctx) {
 
 let drawNode = function(ctx, x, y, node) {
     let metrics = getNodeMetrics(ctx, node);
+    let lines = getLinesForNode(node);
     ctx.font = NORMAL_FONT;
     ctx.fillStyle = NORMAL_STYLE;
-    ctx.fillText(node.value.replace('\n', '\\n'), x + 2, y + 2);
-    let normalHeight = getFontHeight(ctx);
+    let textY = y + 2;
+    textY += 2;
+    for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], x + 2, textY);
+        textY += getFontHeight(ctx);
+    }
+    textY += 2;
     ctx.font = HASH_FONT;
     ctx.fillStyle = HASH_STYLE;
-    ctx.fillText('hash=' + node.h, x + 2, y + 4 + normalHeight);
+    ctx.fillText('hash=' + node.h, x + 2, textY);
     ctx.strokeStyle = node.tree && node.red ? 'red' : 'white';
     ctx.strokeRect(x, y, metrics.width, metrics.height - 2);
 };
