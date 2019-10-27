@@ -596,6 +596,7 @@ HashSet.prototype._resize = function() {
     this.buckets = newBuckets;
 };
 
+let equalsFunction, hashFunction, compareFunction;
 let theSet = new HashSet();
 
 const TITLE_FONT = '2em Consolas, "Courier New", Courier, monospace';
@@ -846,17 +847,23 @@ let refreshCanvas = function() {
 
 let getCurrentElement = function() {
     let element = {value: document.getElementById('value').value};
-    let equals = Function('a', 'b', equalsEditor.getValue());
+    equalsFunction = Function('a', 'b', equalsEditor.getValue());
     element.equals = function(other) {
-        return equals(this.value, other.value);
+        return equalsFunction(this.value, other.value);
     };
-    let hashCode = Function('a', hashCodeEditor.getValue());
+    hashFunction = Function('a', hashCodeEditor.getValue());
     element.hashCode = function() {
-        return hashCode(this.value);
+        return hashFunction(this.value);
     };
-    let compareTo = Function('a', 'b', compareToEditor.getValue());
+    if (document.getElementById('comparable').checked) {
+        compareFunction = Function('a', 'b', compareToEditor.getValue());
+    } else {
+        compareFunction = function() {
+            return 0;
+        }
+    }
     element.compareTo = function(other) {
-        return compareTo(this.value, other.value);
+        return compareFunction(this.value, other.value);
     };
     return element;
 };
@@ -868,34 +875,197 @@ window.onload = function() {
             this.setSelectionRange(0, this.value.length);
         };
     let textOutput = document.getElementById('text_output');
-    document.getElementById('add').addEventListener('click', function () {
+    document.getElementById('add').addEventListener('click', function() {
         textOutput.innerText = '' + theSet.add(getCurrentElement());
         refreshCanvas();
         input.focus();
         input.select();
     });
-    document.getElementById('remove').addEventListener('click', function () {
+    document.getElementById('remove').addEventListener('click', function() {
         textOutput.innerText = '' + theSet.remove(getCurrentElement());
         refreshCanvas();
         input.focus();
         input.select();
     });
-    document.getElementById('contains').addEventListener('click', function () {
+    document.getElementById('contains').addEventListener('click', function() {
         textOutput.innerText = '' + theSet.contains(getCurrentElement());
         input.focus();
         input.select();
     });
-    document.getElementById('iterator').addEventListener('click', function () {
-        textOutput.innerText = '' + theSet.iterator();
+    document.getElementById('iterator').addEventListener('click', function() {
+        textOutput.innerText = theSet.iterator().join(', ');
         input.focus();
         input.select();
     });
-    document.getElementById('clear').addEventListener('click', function () {
+    document.getElementById('clear').addEventListener('click', function() {
         theSet.clear();
         textOutput.innerText = '';
         refreshCanvas();
         input.focus();
         input.select();
     });
+
+    let comparableCheckbox = document.getElementById('comparable');
+
+    comparableCheckbox.addEventListener('change', function() {
+        compareToEditor.setReadOnly(!comparableCheckbox.checked);
+    });
+
+    document.getElementById('load_code_preset').addEventListener('click', function() {
+        let loadFunctions = function(sampleValue, equals, hashCode, compareTo) {
+            let getBody = function(func) {
+                func = func.toString();
+                func = func.substring(func.indexOf('{') + 1, func.lastIndexOf('}'));
+                let indentation = /.*?( *)\S/.exec(func)[1].length;
+                func = func.replace(new RegExp('\n {0,' + indentation + '}', 'g'), '\n');
+                if (func.startsWith('\n'))
+                    func = func.substring(1);
+                if (func.endsWith('\n'))
+                    func = func.substring(0, func.length - 1);
+                return func;
+            };
+            equalsEditor.setValue(getBody(equals), -1);
+            hashCodeEditor.setValue(getBody(hashCode), -1);
+            if (!compareTo) {
+                comparableCheckbox.checked = false;
+                compareToEditor.setValue('', -1);
+                compareToEditor.setReadOnly(true);
+            } else {
+                comparableCheckbox.checked = true;
+                compareToEditor.setValue(getBody(compareTo), -1);
+                compareToEditor.setReadOnly(false);
+            }
+            input.value = sampleValue;
+            input.focus();
+        };
+        let presetName = document.getElementById('code_preset').value;
+        if (presetName === 'string') {
+            loadFunctions('Hello Earth!', function(a, b) {
+                return a === b;
+            }, function(a) {
+                let h = 0;
+                for (let i = 0; i < a.length; i++)
+                    h = (Math.imul(31, h) + a.charCodeAt(i)) & 0xffffffff;
+                return h;
+            }, function(a, b) {
+                return a < b ? -1 : a > b ? 1 : 0;
+            })
+        } else if (presetName === 'integer') {
+            loadFunctions('123', function(a, b) {
+                return parseInt(a) === parseInt(b);
+            }, function(a) {
+                return parseInt(a) & 0xffffffff;
+            }, function(a, b) {
+                a = parseInt(a);
+                b = parseInt(b);
+                return a < b ? -1 : a > b ? 1 : 0;
+            });
+        } else if (presetName === 'chunklong') {
+            loadFunctions('2, 7', function(a, b) {
+                a = /(-?\d+)\s*,\s*(-?\d+)/.exec(a);
+                b = /(-?\d+)\s*,\s*(-?\d+)/.exec(b);
+                return parseInt(a[1]) === parseInt(b[1]) && parseInt(a[2]) === parseInt(b[2]);
+            }, function(a) {
+                a = /(-?\d+)\s*,\s*(-?\d+)/.exec(a);
+                return parseInt(a[1]) ^ parseInt(a[2]);
+            }, function(a, b) {
+                a = /(-?\d+)\s*,\s*(-?\d+)/.exec(a);
+                b = /(-?\d+)\s*,\s*(-?\d+)/.exec(b);
+                let az = parseInt(a[2]), bz = parseInt(b[2]);
+                if (az < bz) return -1;
+                if (az > bz) return 1;
+                let ax = parseInt(a[1]), bx = parseInt(b[1]);
+                return ax < bx ? -1 : ax > bx ? 1 : 0;
+            });
+        } else if (presetName === 'chunkpos') {
+            loadFunctions('2, 7', function(a, b) {
+                a = /(-?\d+)\s*,\s*(-?\d+)/.exec(a);
+                b = /(-?\d+)\s*,\s*(-?\d+)/.exec(b);
+                return parseInt(a[1]) === parseInt(b[1]) && parseInt(a[2]) === parseInt(b[2]);
+            }, function(a) {
+                a = /(-?\d+)\s*,\s*(-?\d+)/.exec(a);
+                let xh = (Math.imul(parseInt(a[1]), 1664525) + 1013904223) & 0xffffffff;
+                let zh = (Math.imul(parseInt(a[2]) ^ 0xdeadbeef, 1664525) + 1013904223) & 0xffffffff;
+                return xh ^ zh;
+            });
+        } else if (presetName === 'blockpos') {
+            loadFunctions('3, 1, 4', function(a, b) {
+                a = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(a);
+                b = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(b);
+                return parseInt(a[1]) === parseInt(b[1])
+                    && parseInt(a[2]) === parseInt(b[2])
+                    && parseInt(a[3]) === parseInt(b[3]);
+            }, function(a) {
+                a = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(a);
+                return (Math.imul(961, parseInt(a[3]))
+                    + Math.imul(31, parseInt(a[2]))
+                    + parseInt(a[1])) & 0xffffffff;
+            }, function(a, b) {
+                a = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(a);
+                b = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(b);
+                let ay = parseInt(a[2]), by = parseInt(b[2]);
+                if (ay !== by) return (ay - by) & 0xffffffff;
+                let az = parseInt(a[3]), bz = parseInt(b[3]);
+                if (az !== bz) return (az - bz) & 0xffffffff;
+                return (parseInt(a[1]) - parseInt(b[1])) & 0xffffffff;
+            });
+        } else if (presetName === 'tiletick') {
+            loadFunctions('{"position": [3, 1, 4], "block":"unpowered_repeater", "time": "123456789", "priority": -1, "id": "47"}', function(a, b) {
+                a = JSON.parse(a);
+                b = JSON.parse(b);
+                let blocksEqual = function(blockA, blockB) {
+                    if (blockA.startsWith('minecraft:')) blockA = blockA.substring(10);
+                    if (blockB.startsWith('minecraft:')) blockB = blockB.substring(10);
+                    if (/^(un)?powered_repeater$/.exec(blockA) && /^(un)?powered_repeater$/.exec(blockB))
+                        return true;
+                    if (/^(un)?powered_comparator$/.exec(blockA) && /^(un)?powered_comparator$/.exec(blockB))
+                        return true;
+                    if (/^(unlit_)?redstone_torch$/.exec(blockA) && /^(unlit_)?redstone_torch$/.exec(blockB))
+                        return true;
+                    return blockA === blockB;
+                };
+                return a.position[0] === b.position[0]
+                    && a.position[1] === b.position[1]
+                    && a.position[2] === b.position[2]
+                    && blocksEqual(a.block, b.block);
+            }, function(a) {
+                a = JSON.parse(a);
+                return (Math.imul(961, a.position[2])
+                    + Math.imul(31, a.position[1])
+                    + a.position[0]) & 0xffffffff;
+            }, function(a, b) {
+                a = JSON.parse(a);
+                b = JSON.parse(b);
+                let compareLongs = function(la, lb) {
+                    la = '' + la;
+                    lb = '' + lb;
+                    if (la.startsWith('-')) {
+                        if (lb.startsWith('-'))
+                            return compareLongs(lb.substring(1), la.substring(1));
+                        return -1;
+                    } else if (lb.startsWith('-'))
+                        return 1;
+                    while (la.startsWith('0')) la = la.substring(1);
+                    while (lb.startsWith('0')) lb = lb.substring(1);
+                    if (la.length !== lb.length)
+                        return la.length < lb.length ? -1 : 1;
+                    for (let i = 0; i < la.length; i++) {
+                        let da = la.charAt(i), db = lb.charAt(i);
+                        if (da !== db)
+                            return da < db ? -1 : 1;
+                    }
+                    return 0;
+                };
+
+                let timeComparison = compareLongs(a.time, b.time);
+                if (timeComparison !== 0)
+                    return timeComparison;
+                if (a.priority !== b.priority)
+                    return a.priority - b.priority;
+                return compareLongs(a.id, b.id);
+            });
+        }
+    });
+
     refreshCanvas();
 };
