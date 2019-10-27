@@ -145,7 +145,7 @@ let _treeRemove = function(node, h, element) {
                 pp.right = null;
         }
     }
-    _moveRootToFront(node, r);
+    _moveRootToFront(ret, r);
     return r;
 };
 let _treeIterator = function(node, output) {
@@ -511,7 +511,7 @@ HashSet.prototype.add = function(element) {
             }
         }
         bucket.push(element);
-        if (bucket.length >= 8) {
+        if (bucket.length > 8) {
             if (this.buckets.length < 64)
                 this._resize();
             else
