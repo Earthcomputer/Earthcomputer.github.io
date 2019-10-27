@@ -702,7 +702,8 @@ let getNodeMetrics = function(ctx, node) {
     ctx.font = HASH_FONT;
     ctx.fillStyle = HASH_STYLE;
     width = Math.max(width, ctx.measureText('hash=' + node.h).width + 4);
-    height += getFontHeight(ctx);
+    width = Math.max(width, ctx.measureText('xhash=' + (node.h ^ (node.h >>> 16))).width + 4);
+    height += getFontHeight(ctx) * 2;
     return {width: width, height: height + 7};
 };
 
@@ -834,6 +835,8 @@ let drawNode = function(ctx, x, y, node) {
     ctx.font = HASH_FONT;
     ctx.fillStyle = HASH_STYLE;
     ctx.fillText('hash=' + node.h, x + 2, textY);
+    textY += getFontHeight(ctx);
+    ctx.fillText('xhash=' + (node.h ^ (node.h >>> 16)), x + 2, textY);
     ctx.strokeStyle = node.tree && node.red ? 'red' : 'white';
     ctx.strokeRect(x, y, metrics.width, metrics.height - 2);
 };
