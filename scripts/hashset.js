@@ -653,15 +653,33 @@ const NORMAL_STYLE = 'white';
 const HASH_FONT = '0.8em Consolas, "Courier New", Courier, monospace';
 const HASH_STYLE = 'white';
 
+let getFontHeight = function(ctx) {
+    if (ctx.fontBoundingBoxAscent && ctx.fontBoundingBoxDescent) {
+        return ctx.fontBoundingBoxAscent + ctx.fontBoundingBoxDescent;
+    }
+    if (!window._fontHeightCache)
+        window._fontHeightCache = new Map();
+    if (window._fontHeightCache.has(ctx.font))
+        return window._fontHeightCache.get(ctx.font);
+    let dummy = document.createElement('div');
+    dummy.appendChild(document.createTextNode('M'));
+    dummy.setAttribute('style', 'font: ' + ctx.font + ';');
+    document.body.appendChild(dummy);
+    let result = dummy.offsetHeight;
+    document.body.removeChild(dummy);
+    window._fontHeightCache.set(ctx.font, result);
+    return result;
+};
+
 let getNodeMetrics = function(ctx, node) {
     ctx.font = NORMAL_FONT;
     ctx.fillStyle = NORMAL_STYLE;
     let width = ctx.measureText(node.value.replace('\n', '\\n')).width + 4;
-    let height = ctx.measureText('M').width * 1.3;
+    let height = getFontHeight(ctx);
     ctx.font = HASH_FONT;
     ctx.fillStyle = HASH_STYLE;
     width = Math.max(width, ctx.measureText('hash=' + node.h).width + 4);
-    height += ctx.measureText('M').width * 1.3;
+    height += getFontHeight(ctx);
     return {width: width, height: height + 7};
 };
 
@@ -670,7 +688,7 @@ let getBucketMetrics = function(ctx, number, bucket) {
     ctx.fillStyle = TITLE_STYLE;
     let width = ctx.measureText('' + number).width;
     // noinspection JSSuspiciousNameCombination
-    let height = ctx.measureText('M').width * 1.3;
+    let height = getFontHeight(ctx);
     if (bucket) {
         if (bucket.tree) {
             let treeMetrics = getSubtreeMetrics(ctx, bucket, new Map());
@@ -783,7 +801,7 @@ let drawNode = function(ctx, x, y, node) {
     ctx.font = NORMAL_FONT;
     ctx.fillStyle = NORMAL_STYLE;
     ctx.fillText(node.value.replace('\n', '\\n'), x + 2, y + 2);
-    let normalHeight = ctx.measureText('M').width * 1.3;
+    let normalHeight = getFontHeight(ctx);
     ctx.font = HASH_FONT;
     ctx.fillStyle = HASH_STYLE;
     ctx.fillText('hash=' + node.h, x + 2, y + 4 + normalHeight);
@@ -859,7 +877,7 @@ let drawBucket = function(ctx, x, number, bucket) {
     ctx.fillStyle = TITLE_STYLE;
     ctx.fillText('' + number, x + width / 2 - ctx.measureText('' + number).width / 2, 0);
     if (bucket) {
-        let y = ctx.measureText('M').width * 1.3;
+        let y = getFontHeight(ctx);
         if (bucket.tree) {
             drawTree(ctx, x, y, bucket, true);
         } else {
