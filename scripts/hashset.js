@@ -595,6 +595,53 @@ HashSet.prototype._resize = function() {
     this.mask = newBuckets.length - 1;
     this.buckets = newBuckets;
 };
+let _copyNode = function(node) {
+    let copy = {value: node.value, equals: node.equals, hashCode: node.hashCode, compareTo: node.compareTo, h: node.h};
+    if (node.identHashCode) copy.identHashCode = node.identHashCode;
+    if (node.tree) {
+        copy.tree = node.tree;
+        copy.red = node.red;
+        copy.parent = node.parent;
+        copy.left = node.left;
+        copy.right = node.right;
+        copy.prev = node.prev;
+        copy.next = node.next;
+    }
+    return copy;
+};
+HashSet.prototype.copy = function() {
+    let copy = new HashSet();
+    copy.size = this.size;
+    copy.threshold = this.threshold;
+    copy.mask = this.mask;
+    copy.buckets = new Array(this.buckets.length);
+    for (let bucketIndex = 0; bucketIndex < this.buckets.length; bucketIndex++) {
+        let bucket = this.buckets[bucketIndex];
+        if (bucket) {
+            if (bucket.tree) {
+                let replacements = new Map();
+                for (let p = bucket; p; p = p.next) {
+                    replacements.set(p, _copyNode(p));
+                }
+                for (let p = bucket; p; p = p.next) {
+                    let replacement = replacements.get(p);
+                    if (replacement.parent) replacement.parent = replacements.get(replacement.parent);
+                    if (replacement.left) replacement.left = replacements.get(replacement.left);
+                    if (replacement.right) replacement.right = replacements.get(replacement.right);
+                    if (replacement.prev) replacement.prev = replacements.get(replacement.prev);
+                    if (replacement.next) replacement.next = replacements.get(replacement.next);
+                }
+                copy.buckets[bucketIndex] = replacements.get(bucket);
+            } else {
+                let newBucket = [];
+                for (let i = 0; i < bucket.length; i++)
+                    newBucket[i] = _copyNode(bucket[i]);
+                copy.buckets[bucketIndex] = newBucket;
+            }
+        }
+    }
+    return copy;
+};
 
 let equalsFunction, hashFunction, compareFunction;
 let theSet = new HashSet();
@@ -876,24 +923,42 @@ window.onload = function() {
         };
     let textOutput = document.getElementById('text_output');
     document.getElementById('add').addEventListener('click', function() {
-        textOutput.innerText = '' + theSet.add(getCurrentElement());
+        let backup = theSet.copy();
+        try {
+            textOutput.innerText = '' + theSet.add(getCurrentElement());
+        } catch (err) {
+            textOutput.innerText = '' + err;
+            theSet = backup;
+        }
         refreshCanvas();
         input.focus();
         input.select();
     });
     document.getElementById('remove').addEventListener('click', function() {
-        textOutput.innerText = '' + theSet.remove(getCurrentElement());
+        let backup = theSet.copy();
+        try {
+            textOutput.innerText = '' + theSet.remove(getCurrentElement());
+        } catch (err) {
+            textOutput.innerText = '' + err;
+            theSet = backup;
+        }
         refreshCanvas();
         input.focus();
         input.select();
     });
     document.getElementById('contains').addEventListener('click', function() {
-        textOutput.innerText = '' + theSet.contains(getCurrentElement());
+        let backup = theSet.copy();
+        try {
+            textOutput.innerText = '' + theSet.contains(getCurrentElement());
+        } catch (err) {
+            textOutput.innerText = '' + err;
+            theSet = backup;
+        }
         input.focus();
         input.select();
     });
     document.getElementById('iterator').addEventListener('click', function() {
-        textOutput.innerText = theSet.iterator().join(', ');
+        textOutput.innerText = theSet.iterator().join('\n');
         input.focus();
         input.select();
     });
