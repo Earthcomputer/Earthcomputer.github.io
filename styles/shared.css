@@ -17,6 +17,10 @@ footer {
     background-color: black;
 }
 
+footer p {
+    max-width: none;
+}
+
 nav ul {
     list-style: none;
     margin: 5px 0 0 0;
