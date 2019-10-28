@@ -1060,36 +1060,36 @@ window.onload = function() {
             }, function(a) {
                 let h = 0;
                 for (let i = 0; i < a.length; i++)
-                    h = (Math.imul(31, h) + a.charCodeAt(i)) & 0xffffffff;
+                    h = (Math.imul(31, h) + a.charCodeAt(i)) | 0;
                 return h;
             }, function(a, b) {
                 return a < b ? -1 : a > b ? 1 : 0;
             })
         } else if (presetName === 'integer') {
             loadFunctions('123', function(a, b) {
-                return parseInt(a) === parseInt(b);
+                return (parseInt(a) | 0) === (parseInt(b) | 0);
             }, function(a) {
-                return parseInt(a) & 0xffffffff;
+                return parseInt(a) | 0;
             }, function(a, b) {
-                a = parseInt(a);
-                b = parseInt(b);
+                a = parseInt(a) | 0;
+                b = parseInt(b) | 0;
                 return a < b ? -1 : a > b ? 1 : 0;
             });
         } else if (presetName === 'chunklong') {
             loadFunctions('2, 7', function(a, b) {
                 a = /(-?\d+)\s*,\s*(-?\d+)/.exec(a);
                 b = /(-?\d+)\s*,\s*(-?\d+)/.exec(b);
-                return parseInt(a[1]) === parseInt(b[1]) && parseInt(a[2]) === parseInt(b[2]);
+                return (parseInt(a[1]) | 0) === (parseInt(b[1]) | 0) && (parseInt(a[2]) | 0) === (parseInt(b[2]) | 0);
             }, function(a) {
                 a = /(-?\d+)\s*,\s*(-?\d+)/.exec(a);
                 return parseInt(a[1]) ^ parseInt(a[2]);
             }, function(a, b) {
                 a = /(-?\d+)\s*,\s*(-?\d+)/.exec(a);
                 b = /(-?\d+)\s*,\s*(-?\d+)/.exec(b);
-                let az = parseInt(a[2]), bz = parseInt(b[2]);
+                let az = parseInt(a[2]) | 0, bz = parseInt(b[2]) | 0;
                 if (az < bz) return -1;
                 if (az > bz) return 1;
-                let ax = parseInt(a[1]), bx = parseInt(b[1]);
+                let ax = parseInt(a[1]) >>> 0, bx = parseInt(b[1]) >>> 0;
                 return ax < bx ? -1 : ax > bx ? 1 : 0;
             });
         } else if (presetName === 'chunkpos') {
@@ -1099,30 +1099,30 @@ window.onload = function() {
                 return parseInt(a[1]) === parseInt(b[1]) && parseInt(a[2]) === parseInt(b[2]);
             }, function(a) {
                 a = /(-?\d+)\s*,\s*(-?\d+)/.exec(a);
-                let xh = (Math.imul(parseInt(a[1]), 1664525) + 1013904223) & 0xffffffff;
-                let zh = (Math.imul(parseInt(a[2]) ^ 0xdeadbeef, 1664525) + 1013904223) & 0xffffffff;
+                let xh = (Math.imul(parseInt(a[1]), 1664525) + 1013904223) | 0;
+                let zh = (Math.imul(parseInt(a[2]) ^ 0xdeadbeef, 1664525) + 1013904223) | 0;
                 return xh ^ zh;
             });
         } else if (presetName === 'blockpos') {
             loadFunctions('3, 1, 4', function(a, b) {
                 a = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(a);
                 b = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(b);
-                return parseInt(a[1]) === parseInt(b[1])
-                    && parseInt(a[2]) === parseInt(b[2])
-                    && parseInt(a[3]) === parseInt(b[3]);
+                return (parseInt(a[1]) | 0) === (parseInt(b[1]) | 0)
+                    && (parseInt(a[2]) | 0) === (parseInt(b[2]) | 0)
+                    && (parseInt(a[3]) | 0) === (parseInt(b[3]) | 0);
             }, function(a) {
                 a = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(a);
                 return (Math.imul(961, parseInt(a[3]))
                     + Math.imul(31, parseInt(a[2]))
-                    + parseInt(a[1])) & 0xffffffff;
+                    + parseInt(a[1])) | 0;
             }, function(a, b) {
                 a = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(a);
                 b = /(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)/.exec(b);
-                let ay = parseInt(a[2]), by = parseInt(b[2]);
-                if (ay !== by) return (ay - by) & 0xffffffff;
-                let az = parseInt(a[3]), bz = parseInt(b[3]);
-                if (az !== bz) return (az - bz) & 0xffffffff;
-                return (parseInt(a[1]) - parseInt(b[1])) & 0xffffffff;
+                let ay = parseInt(a[2]) | 0, by = parseInt(b[2]) | 0;
+                if (ay !== by) return (ay - by) | 0;
+                let az = parseInt(a[3]) | 0, bz = parseInt(b[3]) | 0;
+                if (az !== bz) return (az - bz) | 0;
+                return (parseInt(a[1]) - parseInt(b[1])) | 0;
             });
         } else if (presetName === 'tiletick') {
             loadFunctions('{"position": [3, 1, 4], "block":"unpowered_repeater", "time": "123456789", "priority": -1, "id": "47"}', function(a, b) {
