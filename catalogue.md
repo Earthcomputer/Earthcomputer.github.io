@@ -71,6 +71,18 @@ the artwork.
 
 ![](images/catalogue/stepfish.png)
 
+##### Clockback
+Clockback is a 3D game engine I wrote with a friend. It includes a rendering engine,
+a physics engine, an ECS (Entity Component System) framework, a GUI toolkit, a
+serialization framework, and probably some other smaller things I've forgotten about.
+We intend to make it into a game in its own right in the future.
+
+This project is closed-source.
+
+![](images/catalogue/clockback2.png)
+
+![](images/catalogue/clockback.jpg)
+
 </div>
 
 #### Tools
