@@ -36,9 +36,7 @@ This mod can be installed by users on the latest release version of Minecraft,
 allowing them to connect to servers on older versions without having to
 switch to a compatible client version.
 
-Still a WIP, in the mean time,
-players can also install [Connect to 1.13.x](https://github.com/Earthcomputer/connect_to_1_13_x)
-to connect from a 1.13.0 client across the 1.13.x minor releases, and
+Still a WIP, in the mean time, players can also install
 [Connect to 1.12.x](https://github.com/Earthcomputer/Connect-to-1-12-x) to
 connect from a 1.12.2 client across the 1.12.x minor releases.
 
