@@ -1,0 +1,31 @@
+---
+layout: page
+title: Minecraft Panorama
+script:
+- https://code.jquery.com/jquery-3.5.1.min.js
+- https://webglfundamentals.org/webgl/resources/webgl-utils.js
+- https://webglfundamentals.org/webgl/resources/m4.js
+- scripts/panorama.js
+---
+<canvas id="canvas" width="1800" height="940"></canvas>
+<script id="vertex-shader-3d" type="x-shader/x-vertex">
+attribute vec4 a_position;
+varying vec4 v_position;
+void main() {
+  v_position = a_position;
+  gl_Position = a_position;
+  gl_Position.z = 1.0;
+}
+</script>
+<script id="fragment-shader-3d" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform samplerCube u_skybox;
+uniform mat4 u_viewDirectionProjectionInverse;
+
+varying vec4 v_position;
+void main() {
+  vec4 t = u_viewDirectionProjectionInverse * v_position;
+  gl_FragColor = textureCube(u_skybox, normalize(t.xyz / t.w));
+}
+</script>
