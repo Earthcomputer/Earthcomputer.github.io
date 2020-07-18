@@ -1,6 +1,7 @@
 // WebGL - Textures - Skybox
 // from https://webglfundamentals.org/webgl/webgl-skybox.html
 
+// Shamelessly stolen from maze :P
 
 function main() {
     // Get A WebGL context
