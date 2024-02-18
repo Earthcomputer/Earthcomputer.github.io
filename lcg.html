@@ -1,0 +1,40 @@
+---
+layout: page
+title: LCG tools
+style: styles/visualizer.css
+script:
+  - scripts/lcg.js
+---
+
+<div>
+    <fieldset>
+        <legend>LCG</legend>
+	<label>Multiplier: <input type="text" id="multiplier" value="0x5deece66d"></label>
+	<label>Addend: <input type="text" id="addend" value="0xb"></label>
+	<label>Modulus: <input type="text" id="modulus" value="0x1000000000000"></label>
+    </fieldset>
+    <fieldset>
+        <legend>Operation</legend>
+        <label for="operation">Operation: </label>
+        <select id="operation">
+            <option value="next">Next</option>
+	    <option value="previous">Previous</option>
+            <option value="combine">Combine</option>
+	</select>
+    </fieldset>
+    <fieldset id="advanceinput" style="display: none;">
+        <legend>Input</legend>
+	<label>Seed: <input type="text" id="advanceinput-seed"></label>
+	<label>Amount: <input type="text" id="advanceinput-amount" value="1"></label>
+    </fieldset>
+    <fieldset id="combineinput" style="display: none;">
+        <legend>Input</legend>
+	<label>Amount: <input type="text" id="combineinput-amount" value="1"></label>
+    </fieldset>
+    <button id="calculate">Calculate</button>
+</div>
+<fieldset>
+    <legend>Output</legend>
+    <div id="output"></div>
+</fieldset>
+
