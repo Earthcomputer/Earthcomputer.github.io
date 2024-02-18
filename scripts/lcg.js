@@ -11,7 +11,10 @@ const parseValue = function(elementId, displayName) {
 
 const toDecAndHexString = function(value) {
     if (typeof(value) === 'bigint') {
-        return value.toString() + ' (0x' + value.toString(16) + ')'
+        let result = value.toString() + ' (';
+        if (value < 0n) result += '-0x' + (-value).toString(16);
+	else result += '0x' + value.toString(16);
+	return result + ')'
     } else {
         return value;
     }
@@ -60,16 +63,95 @@ const combineSeed = function(lcg) {
     return 'Multiplier: ' + toDecAndHexString(combinedLcg.multiplier) + '<br>Addend: ' + toDecAndHexString(combinedLcg.addend) + '<br>Modulus: ' + toDecAndHexString(combinedLcg.modulus);
 }
 
+const calcDistance = function(lcg) {
+    const distanceSupported = (lcg.modulus & (lcg.modulus - 1n)) === 0n && lcg.modulus <= (1n << 61n) && lcg.multiplier % 2n !== 0n && lcg.addend % 2n !== 0n;
+    if (!distanceSupported) {
+        document.getElementById('output').innerHTML = '<span class="error">Distance is not supported for this LCG</span>';
+        return null;
+    }
+
+    const from = parseValue('distanceinput-from', 'from');
+    if (from === null) return null;
+    const to = parseValue('distanceinput-to', 'to');
+    if (to === null) return null;
+    
+    const ilog2 = function(value) {
+        // https://stackoverflow.com/a/67682849
+        let result = 0n, i, v;
+        for (i = 1n; value >> (1n << i); i <<= 1n) {
+        }
+        while (value > 1n) {
+            v = 1n << --i;
+            if (value >> v) {
+                result += v;
+                value >>= v;
+            }
+        }
+        return result;
+    }
+
+    const mask = function(value, bits) {
+        return value & ((1n << bits) - 1n);
+    }
+
+    const modPow = function(a, b, m) {
+        let k = a;
+        let result = 1n;
+        for (let mask = 1n; mask <= b; mask <<= 1n) {
+	    if ((b & mask) !== 0n) {
+                result = (result * k) % m;
+	    }
+            k = (k * k) % m;
+	}
+        return result;
+    }
+
+    const modInverse = function(value, bits) {
+        const modulus = 1n << bits;
+        return modPow(value, modulus - 1n, modulus);
+    }
+
+    const theta = function(number, exp) {
+        if (number % 4n === 3n) {
+            number = (1n << (exp + 2n)) - number;
+	}
+        let xHat = number;
+        xHat = modPow(xHat, 1n << (exp + 1n), 1n << (2n * exp + 3n));
+        xHat -= 1n;
+        xHat /= 1n << (exp + 3n);
+        xHat %= 1n << exp;
+        return xHat;
+    }
+    
+    const distanceFromZero = function(lcg, seed) {
+        const exp = ilog2(lcg.modulus);
+        const a = lcg.multiplier;
+        const b = mask(seed * (lcg.multiplier - 1n) * modInverse(lcg.addend, exp) + 1n, exp + 2n);
+        const aBar = theta(a, exp);
+        const bBar = theta(b, exp);
+        return mask(bBar * modInverse(aBar, exp), exp);
+    }
+
+    const fromDfz = distanceFromZero(lcg, from);
+    const toDfz = distanceFromZero(lcg, to);
+    let distance = toDfz - fromDfz;
+    if (distance < 0n) distance += lcg.modulus;
+    if (distance > lcg.modulus / 2n) distance -= lcg.modulus;
+    return distance;
+}
+
 const inputs = {
     'next': 'advanceinput',
     'previous': 'advanceinput',
-    'combine': 'combineinput'
+    'combine': 'combineinput',
+    'distance': 'distanceinput'
 };
 
 const functions = {
     'next': nextSeed,
     'previous': previousSeed,
-    'combine': combineSeed
+    'combine': combineSeed,
+    'distance': calcDistance
 };
 
 const calculate = function() {

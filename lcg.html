@@ -20,6 +20,7 @@ script:
             <option value="next">Next</option>
 	    <option value="previous">Previous</option>
             <option value="combine">Combine</option>
+            <option value="distance">Distance</option>
 	</select>
     </fieldset>
     <fieldset id="advanceinput" style="display: none;">
@@ -30,6 +31,11 @@ script:
     <fieldset id="combineinput" style="display: none;">
         <legend>Input</legend>
 	<label>Amount: <input type="text" id="combineinput-amount" value="1"></label>
+    </fieldset>
+    <fieldset id="distanceinput" style="display: none;">
+        <legend>Input</legend>
+	<label>From: <input type="text" id="distanceinput-from"></label>
+	<label>To: <input type="text" id="distanceinput-to"></label>
     </fieldset>
     <button id="calculate">Calculate</button>
 </div>
