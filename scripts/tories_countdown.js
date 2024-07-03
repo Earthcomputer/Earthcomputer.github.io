@@ -14,12 +14,12 @@ function countdown() {
     document.getElementById('seconds').innerText = seconds;
 
     if (timeLeft < 0) {
-        clearInterval(timer);
+        clearInterval(window.timer);
         document.getElementById('countdown').innerText = 'Happy Ditch the Tories Day!';
     }
 }
 
 window.onload = function() {
-    const timer = setInterval(countdown, 1000);
+    window.timer = setInterval(countdown, 1000);
     countdown();
 }
