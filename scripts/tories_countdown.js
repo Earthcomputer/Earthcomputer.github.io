@@ -19,5 +19,7 @@ function countdown() {
     }
 }
 
-const timer = setInterval(countdown, 1000);
-countdown();
+window.onload = function() {
+    const timer = setInterval(countdown, 1000);
+    countdown();
+}
