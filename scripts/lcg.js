@@ -70,9 +70,9 @@ const calcDistance = function(lcg) {
         return null;
     }
 
-    const from = parseValue('distanceinput-from', 'from');
+    const from = (parseValue('distanceinput-from', 'from') & (lcg.modulus - 1n));
     if (from === null) return null;
-    const to = parseValue('distanceinput-to', 'to');
+    const to = (parseValue('distanceinput-to', 'to') & (lcg.modulus - 1n));
     if (to === null) return null;
     
     const ilog2 = function(value) {
