@@ -153,6 +153,11 @@ legend {
     color: #00A800;
 }
 
+button {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 .monospace {
     font-family: "Consolas", "Courier New", Courier, monospace;
 }
