@@ -30,16 +30,24 @@ script:
         </fieldset>
         <fieldset>
             <legend>Code (JavaScript)</legend>
-            <span class="monospace">equals(a, b)</span>
-            <div id="equals">return a === b;</div><br/>
-            <span class="monospace">hashCode(a)</span>
-            <div id="hashCode">let h = 0;
+            <label>
+                <span class="monospace">equals(a, b)</span>
+                <div id="equals">return a === b;</div>
+            </label>
+            <br/>
+            <label>
+                <span class="monospace">hashCode(a)</span>
+                <div id="hashCode">let h = 0;
 for (let i = 0; i < a.length; i++)
     h = (Math.imul(31, h) + a.charCodeAt(i)) | 0;
-return h;</div><br/>
+return h;</div>
+            </label>
+            <br/>
             <label><input type="checkbox" id="comparable" checked>Comparable</label><br/>
-            <span class="monospace">compareTo(a, b)</span>
-            <div id="compareTo">return a < b ? -1 : a > b ? 1 : 0;</div>
+            <label>
+                <span class="monospace">compareTo(a, b)</span>
+                <div id="compareTo">return a < b ? -1 : a > b ? 1 : 0;</div>
+            </label>
             <script type="text/javascript">
                 let createEditor = function(id) {
                     let editor = ace.edit(id);

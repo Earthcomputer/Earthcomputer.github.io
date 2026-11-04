@@ -8,7 +8,7 @@ but code-switch (pun intended) to C/C++/Python/JavaScript/whatever when
 convenient.
 
 <div class="indent" markdown="1">
-#### ![](images/minecraft.png) Minecraft Mods
+#### ![Creeper Logo](images/minecraft.png) Minecraft Mods
 I'm into Minecraft, I'm into coding, so guess what?
 
 <div class="indent" markdown="1">
@@ -20,7 +20,7 @@ and infinite tools, and a book filler command.
 
 [Project on GitHub](https://github.com/Earthcomputer/clientcommands)
 
-![](images/catalogue/clientcommands.png)
+![clientcommands](images/catalogue/clientcommands.png)
 
 ##### Enchantment Cracker
 Not strictly a mod, but an external "calculator" tool for those who are in
@@ -29,7 +29,7 @@ looking nice now thanks to Hexicube!
 
 [Project on GitHub](https://github.com/Earthcomputer/EnchantmentCracker)
 
-![](images/catalogue/enchantment_cracker.png)
+![Enchantment Cracker](images/catalogue/enchantment_cracker.png)
 
 ##### multiconnect
 This mod can be installed by users on the latest release version of Minecraft,
@@ -42,7 +42,7 @@ connect from a 1.12.2 client across the 1.12.x minor releases.
 
 [Project on GitHub](https://github.com/Earthcomputer/multiconnect)
 
-![](images/catalogue/multiconnect.png)
+![multiconnect](images/catalogue/multiconnect.png)
 
 ##### EasyEditors
 This 1.11 mod aims to make certain annoying GUIs in Minecraft easier to use.
@@ -51,7 +51,7 @@ in a command block, without you having to remember what's what.
 
 [Project on GitHub](https://github.com/Earthcomputer/Easy-Editors)
 
-![](images/catalogue/EasyEditors.png)
+![Easy Editors](images/catalogue/EasyEditors.png)
 
 </div>
 
@@ -67,7 +67,7 @@ the artwork.
 
 [Project on GitHub](https://github.com/Earthcomputer/Stepfish)
 
-![](images/catalogue/stepfish.png)
+![Stepfish](images/catalogue/stepfish.png)
 
 ##### Clockback
 Clockback is a 3D game engine I wrote with a friend. It includes a rendering engine,
@@ -77,9 +77,9 @@ We intend to make it into a game in its own right in the future.
 
 This project is closed-source.
 
-![](images/catalogue/clockback2.png)
+![Clockback demo](images/catalogue/clockback2.png)
 
-![](images/catalogue/clockback.jpg)
+![Clockback lighting demo](images/catalogue/clockback.jpg)
 
 </div>
 
@@ -100,7 +100,7 @@ you don't have access to the individual commits.
 
 [Project on GitHub](https://github.com/Earthcomputer/DiffSorter)
 
-![](images/catalogue/diffsorter.png)
+![Diff Sorter](images/catalogue/diffsorter.png)
 
 ##### CollectionVisualizer
 A library to visualize the internal structure of Java collections in real
@@ -109,7 +109,7 @@ wrap my head around a couple of bugs I found in Java's HashMap.
 
 [Project on GitHub](https://github.com/Earthcomputer/CollectionVisualizer)
 
-![](images/catalogue/CollectionVisualizer.png)
+![Collection Visualizer](images/catalogue/CollectionVisualizer.png)
 
 </div>
 

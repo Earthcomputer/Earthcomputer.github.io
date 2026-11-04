@@ -51,7 +51,7 @@ nav a:hover {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: green;
+    color: #00A800;
 }
 
 h1 {
@@ -93,11 +93,11 @@ sup {
 }
 
 a:link {
-    color: #2f72ff
+    color: #94b4ff
 }
 
 a:visited {
-    color: #9e57ff
+    color: #c89eff
 }
 
 ul, ol {
@@ -150,7 +150,7 @@ fieldset {
 
 legend {
     font-family: "Consolas", "Courier New", Courier, monospace;
-    color: green;
+    color: #00A800;
 }
 
 .monospace {
@@ -184,7 +184,7 @@ legend {
 }
 
 .error {
-    color: red;
+    color: #ff9494;
 }
 
 @media only screen and (min-width: 460px) {

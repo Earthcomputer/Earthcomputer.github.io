@@ -270,7 +270,8 @@ let refreshHTML = function() {
                         html += '<input type="number" min="0" max="' + stateCount + '" ' +
                             'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '" ' +
                             'id="fsm_' + left + '_' + middle + '_' + right + '" ' +
-                            'style="width:64px">';
+                            'style="width:64px" ' +
+                            'aria-label="FSM input, left ' + left + ', middle ' + middle + ', right ' + right + '">';
                     } else {
                         html += "0";
                     }
@@ -296,6 +297,7 @@ let refreshHTML = function() {
                     if (middle !== 0 || left !== 0 || right !== 0) {
                         html += '<input type="number" min="0" max="' + stateCount + '" ' +
                             'id="fsm_' + left + '_' + middle + '_' + right + '" ' +
+                            'aria-label="FSM input, left ' + left + ', middle ' + middle + ', right ' + right + '" '
                             'value="' + (window.fsm[middle][left][right] === -1 ? '' : window.fsm[middle][left][right]) + '">';
                     } else {
                         html += "0";

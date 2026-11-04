@@ -4,7 +4,7 @@
     {% include head_common.html %}
 </head>
 <body>
-    <header>
+    <header role="banner">
         <div class="header_icon_container">
             <a href="/index.html"><img src="/images/icon.png" alt="Icon" class="icon" /></a>
         </div>
@@ -12,7 +12,9 @@
         {% include navbar.html %}
     </header>
     {% if page.title %}<h3 class="monospace">{{ page.title }}</h3>{% endif %}
-    {{ content }}
+    <main role="main">
+        {{ content }}
+    </main>
     {% include footer.html %}
 </body>
 </html>
