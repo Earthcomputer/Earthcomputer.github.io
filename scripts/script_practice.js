@@ -870,7 +870,7 @@ function gradingSystemPrompt(script) {
         '',
         'Set "remark" to a short note (one or two sentences, in English) for the learner only if there is something worth telling them that the list of symbols cannot express: '
             + 'for example a mistake that isn\'t tied to one symbol (such as word boundaries or a sound change across syllables), an accepted but unusual romanization they should know about, or a problem with the text itself. '
-            + 'Otherwise set it to an empty string. Don\'t use it to repeat the mistakes already listed or to praise the learner.',
+            + 'Otherwise set it to an empty string. Don\'t use it to repeat the mistakes already listed or to praise the learner. This remark is displayed directly to the learner, so refer to them as "you".',
         '',
         'If there appears to be a mistake in the text itself, do not report it as a learner mistake. The text should have been written according to the following writing notes:',
         ...getFullWritingNotes(script),
