@@ -1,0 +1,109 @@
+[hidden] {
+    display: none !important;
+}
+
+.sp_row {
+    margin: 6px 0;
+    line-height: 1.6;
+}
+
+.sp_row label {
+    margin-right: 12px;
+}
+
+input, select, textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.sp_note {
+    color: #bbbbbb;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+p.sp_note {
+    padding: 5px 0;
+}
+
+details {
+    margin: 8px 0;
+}
+
+summary {
+    cursor: pointer;
+    color: #00A800;
+}
+
+.sp_sentence {
+    font-size: 2em;
+    line-height: 1.6;
+    margin: 12px 0;
+    overflow-wrap: anywhere;
+}
+
+.sp_sentence:empty {
+    display: none;
+}
+
+.sp_palette {
+    margin: 6px 0;
+}
+
+.sp_palette button {
+    margin: 2px;
+    min-width: 2em;
+    font-size: 1.1em;
+}
+
+#answer {
+    display: block;
+    width: 100%;
+    font-size: 1.3em;
+    line-height: 1.4;
+    margin-top: 4px;
+}
+
+.sp_latin {
+    font-size: 1.2em;
+}
+
+#mistakes {
+    list-style: disc inside;
+    line-height: 1.6;
+}
+
+.sp_symbol {
+    font-size: 1.4em;
+}
+
+.sp_stats_table {
+    margin: 8px 0;
+}
+
+.sp_stats_table caption {
+    text-align: left;
+    color: #00A800;
+    padding: 4px 0;
+}
+
+.sp_stats_table td, .sp_stats_table th {
+    padding: 3px 10px;
+}
+
+.sp_reasoning {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-height: 20em;
+    overflow-y: auto;
+    color: #bbbbbb;
+    font-size: 0.9em;
+    line-height: 1.4;
+    padding: 4px 0;
+}
+
+.sp_remark {
+    border-left: 3px solid #00A800;
+    padding: 4px 10px;
+    margin: 8px 0;
+}

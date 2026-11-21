@@ -1,0 +1,126 @@
+---
+layout: page
+title: Script Practice
+style: /styles/script_practice.css
+script: /scripts/script_practice.js
+---
+
+<p>
+    Practice reading other writing systems. An LLM writes some text in the script you pick, you transliterate it into
+    the Latin alphabet using any established romanization, and the LLM marks which symbols you got wrong.
+    Symbols you get wrong (and pairs of symbols you mix up) come up more often until you get them right
+    <span id="mastery_count">3</span> times in a row.
+</p>
+
+<fieldset id="llm_settings">
+    <legend>LLM settings</legend>
+    <div class="sp_row">
+        <label>Provider:
+            <select id="provider">
+                <option value="claude">Claude (Anthropic)</option>
+                <option value="openai">ChatGPT (OpenAI)</option>
+                <option value="gemini">Gemini (Google)</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="openrouter">OpenRouter (many models)</option>
+            </select>
+        </label>
+    </div>
+    <div class="sp_row">
+        <label>Model: <select id="model"></select></label>
+        <input type="text" id="custom_model" placeholder="Model ID" spellcheck="false" autocomplete="off" hidden>
+        <button type="button" id="refresh_models">Refresh model list</button>
+    </div>
+    <div class="sp_row">
+        <label>API key: <input type="password" id="api_key" autocomplete="off" spellcheck="false"></label>
+        <label>Passphrase: <input type="password" id="passphrase" autocomplete="off" spellcheck="false"></label>
+    </div>
+    <div class="sp_row">
+        <button type="button" id="save_key">Save key</button>
+        <button type="button" id="unlock_key">Unlock</button>
+        <button type="button" id="forget_key">Forget key</button>
+        <span id="key_status"></span>
+    </div>
+    <div id="settings_error" class="error"></div>
+    <p class="sp_note">
+        Choose a passphrase to protect your key. You'll need it each time you open this page.
+        Don't have a key? <a id="key_guide" target="_blank" rel="noopener"></a>
+    </p>
+    <details>
+        <summary>Credit-saving options</summary>
+        <div class="sp_row">
+            <label>Reasoning effort when grading:
+                <select id="effort">
+                    <option value="low">Low (cheapest)</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </label>
+            <span class="sp_note">Generating text always uses as little reasoning as the model allows.</span>
+        </div>
+        <div class="sp_row">
+            <label>Max output tokens: <input type="number" id="max_tokens" min="256" step="256" placeholder="auto"></label>
+            <span class="sp_note">Leave blank to scale with the difficulty.</span>
+        </div>
+        <div class="sp_row">
+            <label><input type="checkbox" id="skip_exact"> Don't send a grading request when my answer exactly matches the reference</label>
+        </div>
+    </details>
+    <div id="usage" class="sp_note"></div>
+</fieldset>
+
+<fieldset>
+    <legend>Script</legend>
+    <div class="sp_row">
+        <label>Script: <select id="script"></select></label>
+        <label>Difficulty: <select id="difficulty"></select></label>
+    </div>
+    <p id="script_info" class="sp_note"></p>
+</fieldset>
+
+<fieldset id="practice">
+    <legend>Practice</legend>
+    <div class="sp_row">
+        <button type="button" id="generate">Generate text</button>
+        <span id="generate_busy" class="sp_note" hidden></span>
+    </div>
+    <details id="generate_reasoning" hidden>
+        <summary>Model reasoning</summary>
+        <div class="sp_reasoning"></div>
+    </details>
+    <div id="generate_error" class="error"></div>
+    <div id="sentence" class="sp_sentence"></div>
+    <div id="note" class="sp_note"></div>
+    <label for="answer">Your transliteration:</label>
+    <div id="palette" class="sp_palette"></div>
+    <textarea id="answer" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+    <div class="sp_row">
+        <button type="button" id="submit">Submit</button>
+        <span class="sp_note">(Ctrl+Enter)</span>
+        <span id="grade_busy" class="sp_note" hidden></span>
+    </div>
+    <details id="grade_reasoning" hidden>
+        <summary>Model reasoning</summary>
+        <div class="sp_reasoning"></div>
+    </details>
+    <div id="grade_error" class="error"></div>
+</fieldset>
+
+<fieldset id="results" hidden>
+    <legend>Results</legend>
+    <div id="result_summary"></div>
+    <ul id="mistakes"></ul>
+    <p id="remark" class="sp_remark" hidden></p>
+    <p>Your answer: <span id="your_answer" class="sp_latin"></span></p>
+    <p>Reference transliteration: <span id="reference" class="sp_latin"></span></p>
+    <p>Translation: <span id="translation"></span></p>
+    <button type="button" id="next">Next</button>
+</fieldset>
+
+<fieldset>
+    <legend>Problem symbols</legend>
+    <details>
+        <summary id="stats_summary">Show</summary>
+        <div id="stats"></div>
+        <button type="button" id="reset_stats">Reset stats for this script</button>
+    </details>
+</fieldset>
