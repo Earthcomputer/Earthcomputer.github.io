@@ -23,10 +23,10 @@ const PREFERRED_MODELS = {
 // official guides on creating an API key for each provider
 const KEY_GUIDES = {
     claude: {name: 'Claude', url: 'https://platform.claude.com/docs/en/get-api-key'},
-    openai: {name: 'OpenAI', url: 'https://platform.openai.com/docs/quickstart'},
+    openai: {name: 'OpenAI', url: 'https://platform.openai.com/api-keys'},
     gemini: {name: 'Gemini', url: 'https://ai.google.dev/gemini-api/docs/api-key'},
-    deepseek: {name: 'DeepSeek', url: 'https://api-docs.deepseek.com/'},
-    openrouter: {name: 'OpenRouter', url: 'https://openrouter.ai/docs/api-keys'},
+    deepseek: {name: 'DeepSeek', url: 'https://platform.deepseek.com/api_keys'},
+    openrouter: {name: 'OpenRouter', url: 'https://openrouter.ai/workspaces/default/keys'},
 };
 
 const DIFFICULTIES = [
