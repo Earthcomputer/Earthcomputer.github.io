@@ -151,6 +151,62 @@ const SCRIPTS = [
 const SCRIPTS_BY_ID = Object.fromEntries(SCRIPTS.map(s => [s.id, s]));
 
 // ---------------------------------------------------------------------------
+// Automatic word checking
+// ---------------------------------------------------------------------------
+// A fast pass before the model is asked: the learner's answer is diffed word by word against the reference
+// transliteration, ignoring differences that never matter. Words that match are correct; only the differences are
+// sent to the model.
+
+function stripMarks(s) {
+    return s.normalize('NFD').replace(/\p{M}/gu, '').normalize('NFC');
+}
+
+// Removes differences that never matter, per script. Applied to the whole transliteration before splitting it into words.
+const CANON = {
+    // accents may always be dropped, as may the macrons on ī and ō
+    greek: s => stripMarks(s),
+    // the apostrophes and quotes used for ь and ъ, turned into letters so they stay part of the word
+    cyrillic: s => s.normalize('NFC').replace(/['’ʼ′]/g, 'ʹ').replace(/["”“″]/g, 'ʺ'),
+    // case, and hyphens or apostrophes between syllables
+    hangul: s => s.normalize('NFC').toLowerCase().replace(/[-‐'’ʼ]/g, ''),
+    // case, a circumflex instead of a macron, and hyphens or apostrophes (such as n')
+    kana: s => s.normalize('NFC').toLowerCase()
+        .replace(/[âîûêô]/g, c => ({â: 'ā', î: 'ī', û: 'ū', ê: 'ē', ô: 'ō'})[c])
+        .replace(/[-‐'’ʼ]/g, ''),
+};
+
+function latinWords(scriptId, text) {
+    return CANON[scriptId](text).match(/[\p{L}\p{M}\p{N}]+/gu) || [];
+}
+
+// Diffs the answer against the reference word by word (longest common subsequence). Returns the differences in order,
+// as [{reference, answer}], where either may be empty (a skipped or an extra word).
+function autoCheck(scriptId, reference, answer) {
+    const a = latinWords(scriptId, reference), b = latinWords(scriptId, answer);
+    const common = Array.from({length: a.length + 1}, () => new Array(b.length + 1).fill(0));
+    for (let i = a.length - 1; i >= 0; i--) {
+        for (let j = b.length - 1; j >= 0; j--) {
+            common[i][j] = a[i] === b[j] ? common[i + 1][j + 1] + 1 : Math.max(common[i + 1][j], common[i][j + 1]);
+        }
+    }
+    const differences = [];
+    let current = null;
+    let i = 0, j = 0;
+    while (i < a.length || j < b.length) {
+        if (i < a.length && j < b.length && a[i] === b[j]) {
+            current = null;
+            i++;
+            j++;
+            continue;
+        }
+        if (!current) differences.push(current = {reference: [], answer: []});
+        if (j >= b.length || (i < a.length && common[i + 1][j] >= common[i][j + 1])) current.reference.push(a[i++]);
+        else current.answer.push(b[j++]);
+    }
+    return differences.map(d => ({reference: d.reference.join(' '), answer: d.answer.join(' ')}));
+}
+
+// ---------------------------------------------------------------------------
 // Storage helpers
 // ---------------------------------------------------------------------------
 
@@ -227,9 +283,9 @@ const settings = {
     provider: lsGet('provider', 'claude'),
     effort: lsGet('effort', 'low'),
     // the old single setting only ever mattered for generation
-    generateMaxTokens: lsGet('generateMaxTokens', lsGet('maxTokens', null)),
+    generateMaxTokens: lsGet('generateMaxTokens', null),
     gradeMaxTokens: lsGet('gradeMaxTokens', null),
-    skipExact: lsGet('skipExact', true),
+    autoCheck: lsGet('autoCheck', true),
     script: lsGet('script', 'greek'),
     difficulty: lsGet('difficulty', 'sentence'),
 };
@@ -864,6 +920,7 @@ function gradingSystemPrompt(script) {
         '',
         'A "symbol" means ' + script.symbolDescription + '. '
             + 'Report every distinct symbol in the text that the learner transliterated incorrectly at least once, listing each symbol only once, exactly as it appears in the list of symbols in the text. '
+            + 'If the user message lists the parts where the learner\'s transliteration differs from the reference, everything else has already been checked and is correct, so only report mistakes in those parts. '
             + 'Set "confusedWith" to the symbol whose transliteration is what the learner wrote instead, if there is one; otherwise set it to an empty string. '
             + 'A symbol the learner left out entirely is a mistake with an empty confusedWith. '
             + 'Do not report symbols that were transliterated correctly. If the whole transliteration is correct, return an empty list.',
@@ -877,13 +934,24 @@ function gradingSystemPrompt(script) {
     ].join('\n');
 }
 
-function gradingUserPrompt(item, answer) {
-    return [
+// differences is null to grade the whole answer, or the result of autoCheck to grade only those parts.
+function gradingUserPrompt(item, answer, differences) {
+    const lines = [
         'Original text: ' + item.text,
         'Reference transliteration: ' + item.transliteration,
-        'Symbols in the text: ' + item.symbols.join(', '),
         'Learner\'s transliteration: ' + answer,
-    ].join('\n');
+        'Symbols in the text: ' + item.symbols.join(', '),
+    ];
+    if (differences) {
+        lines.push('', 'The learner\'s transliteration has already been compared with the reference word by word, and the words that match are correct. '
+            + 'Only grade these parts where they differ (the comparison ignored accents, case, punctuation and similar details where those never matter):');
+        for (const d of differences) {
+            if (!d.answer) lines.push('- Reference "' + d.reference + '": the learner wrote nothing here.');
+            else if (!d.reference) lines.push('- The learner added "' + d.answer + '", which isn\'t in the reference.');
+            else lines.push('- Reference "' + d.reference + '": the learner wrote "' + d.answer + '".');
+        }
+    }
+    return lines.join('\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -988,10 +1056,6 @@ function cleanMistakes(script, item, rawMistakes) {
         result.push({symbol: symbol, confusedWith: confusedWith});
     }
     return result;
-}
-
-function normalizeForComparison(text) {
-    return text.normalize('NFC').replace(/[\s\p{P}]/gu, '');
 }
 
 // ---------------------------------------------------------------------------
@@ -1258,14 +1322,17 @@ async function submit() {
     setBusy(true, el.gradeArea);
     try {
         let mistakes, remark = '';
-        if (settings.skipExact && item.transliteration
-            && normalizeForComparison(answer) === normalizeForComparison(item.transliteration)) {
+        // null means grade the whole answer
+        const differences = settings.autoCheck && item.transliteration ? autoCheck(script.id, item.transliteration, answer) : null;
+        if (differences && !differences.length) {
             mistakes = [];
         } else {
-            const progress = startProgress('Grading', el.gradeArea);
+            const count = differences && differences.length;
+            const label = count ? 'Grading ' + count + ' difference' + (count === 1 ? '' : 's') : 'Grading';
+            const progress = startProgress(label, el.gradeArea);
             let result;
             try {
-                result = await callLLM(gradingSystemPrompt(script), gradingUserPrompt(item, answer), GRADING_SCHEMA, progress, settings.effort, 'grade');
+                result = await callLLM(gradingSystemPrompt(script), gradingUserPrompt(item, answer, differences), GRADING_SCHEMA, progress, settings.effort, 'grade');
             } finally {
                 progress.done();
             }
@@ -1396,7 +1463,7 @@ function init() {
         provider: byId('provider'), model: byId('model'), customModel: byId('custom_model'), refreshModels: byId('refresh_models'),
         apiKey: byId('api_key'), passphrase: byId('passphrase'), saveKey: byId('save_key'), unlockKey: byId('unlock_key'),
         forgetKey: byId('forget_key'), keyStatus: byId('key_status'),
-        effort: byId('effort'), generateMaxTokens: byId('generate_max_tokens'), gradeMaxTokens: byId('grade_max_tokens'), skipExact: byId('skip_exact'), usage: byId('usage'),
+        effort: byId('effort'), generateMaxTokens: byId('generate_max_tokens'), gradeMaxTokens: byId('grade_max_tokens'), autoCheck: byId('auto_check'), usage: byId('usage'),
         script: byId('script'), difficulty: byId('difficulty'), scriptInfo: byId('script_info'),
         settingsError: byId('settings_error'), keyGuide: byId('key_guide'),
         generate: byId('generate'), sentence: byId('sentence'), note: byId('note'),
@@ -1423,7 +1490,7 @@ function init() {
             saveSetting(purpose + 'MaxTokens', value > 0 ? value : null);
         });
     }
-    el.skipExact.checked = settings.skipExact;
+    el.autoCheck.checked = settings.autoCheck;
     el.script.value = settings.script;
     el.difficulty.value = settings.difficulty;
 
@@ -1449,7 +1516,7 @@ function init() {
         saveSetting('effort', el.effort.value);
         renderMaxTokenPlaceholders();
     });
-    el.skipExact.addEventListener('change', () => saveSetting('skipExact', el.skipExact.checked));
+    el.autoCheck.addEventListener('change', () => saveSetting('autoCheck', el.autoCheck.checked));
 
     el.script.addEventListener('change', () => {
         saveSetting('script', el.script.value);
@@ -1489,7 +1556,8 @@ function init() {
 }
 
 // exposed for debugging in the console
-window.scriptPractice = {SCRIPTS: SCRIPTS_BY_ID, generationSystemPrompt, gradingSystemPrompt, symbolsOf: (id, text) => SCRIPTS_BY_ID[id].symbolsOf(text)};
+window.scriptPractice = {SCRIPTS: SCRIPTS_BY_ID, generationSystemPrompt, gradingSystemPrompt, symbolsOf: (id, text) => SCRIPTS_BY_ID[id].symbolsOf(text),
+    autoCheck};
 
 window.addEventListener('DOMContentLoaded', init);
 
