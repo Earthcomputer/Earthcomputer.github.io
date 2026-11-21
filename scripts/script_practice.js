@@ -30,11 +30,11 @@ const KEY_GUIDES = {
 };
 
 const DIFFICULTIES = [
-    {id: 'word', label: 'Single word', prompt: 'exactly one word (no sentence, no punctuation)', maxTokens: 3000, slots: 2},
-    {id: 'phrase', label: 'Short phrase (2–4 words)', prompt: 'a short phrase of 2 to 4 words', maxTokens: 3000, slots: 3},
-    {id: 'sentence', label: 'Sentence (~6–12 words)', prompt: 'one sentence of roughly 6 to 12 words', maxTokens: 4000, slots: 5},
-    {id: 'long', label: 'Long sentence (~15–25 words)', prompt: 'one long sentence of roughly 15 to 25 words', maxTokens: 6000, slots: 7},
-    {id: 'paragraph', label: 'Paragraph (3–5 sentences)', prompt: 'a short paragraph of 3 to 5 connected sentences', maxTokens: 10000, slots: 10},
+    {id: 'word', label: 'Single word', prompt: 'exactly one word (no sentence, no punctuation)', generateMaxTokens: 3000, gradeMaxTokens: 8000, slots: 2},
+    {id: 'phrase', label: 'Short phrase (2–4 words)', prompt: 'a short phrase of 2 to 4 words', generateMaxTokens: 3000, gradeMaxTokens: 8000, slots: 3},
+    {id: 'sentence', label: 'Sentence (~6–12 words)', prompt: 'one sentence of roughly 6 to 12 words', generateMaxTokens: 4000, gradeMaxTokens: 12000, slots: 5},
+    {id: 'long', label: 'Long sentence (~15–25 words)', prompt: 'one long sentence of roughly 15 to 25 words', generateMaxTokens: 6000, gradeMaxTokens: 16000, slots: 7},
+    {id: 'paragraph', label: 'Paragraph (3–5 sentences)', prompt: 'a short paragraph of 3 to 5 connected sentences', generateMaxTokens: 10000, gradeMaxTokens: 24000, slots: 10},
 ];
 
 const TOPICS = [
@@ -226,7 +226,9 @@ async function decryptApiKey(stored, passphrase) {
 const settings = {
     provider: lsGet('provider', 'claude'),
     effort: lsGet('effort', 'low'),
-    maxTokens: lsGet('maxTokens', null),
+    // the old single setting only ever mattered for generation
+    generateMaxTokens: lsGet('generateMaxTokens', lsGet('maxTokens', null)),
+    gradeMaxTokens: lsGet('gradeMaxTokens', null),
     skipExact: lsGet('skipExact', true),
     script: lsGet('script', 'greek'),
     difficulty: lsGet('difficulty', 'sentence'),
@@ -260,8 +262,18 @@ function currentModel() {
     return selected && list.includes(selected) ? selected : list[0];
 }
 
-function currentMaxTokens() {
-    return settings.maxTokens || currentDifficulty().maxTokens;
+// Grading reasons about every symbol, so it gets a larger budget that also grows with the reasoning effort.
+const GRADE_EFFORT_FACTOR = {low: 1, medium: 1.5, high: 2};
+const MAX_AUTO_TOKENS = 32000;
+
+function autoMaxTokens(purpose) {
+    const difficulty = currentDifficulty();
+    if (purpose === 'generate') return difficulty.generateMaxTokens;
+    return Math.min(MAX_AUTO_TOKENS, Math.round(difficulty.gradeMaxTokens * (GRADE_EFFORT_FACTOR[settings.effort] || 1)));
+}
+
+function currentMaxTokens(purpose) {
+    return settings[purpose + 'MaxTokens'] || autoMaxTokens(purpose);
 }
 
 // ---------------------------------------------------------------------------
@@ -395,7 +407,7 @@ function claudeThinkingConfig(model) {
     return thinking;
 }
 
-const CUT_OFF_MESSAGE = 'The response was cut off. Increase "Max output tokens" in the credit-saving options, or lower the effort.';
+const CUT_OFF_MESSAGE = 'The response was cut off. Increase the max output tokens in the credit-saving options, or lower the reasoning effort.';
 
 // `effort` is 'low', 'medium' or 'high', or 'none' to ask for as little reasoning as the model allows.
 
@@ -733,14 +745,15 @@ const PROVIDERS = {
 // provider/model pairs that rejected a request for no reasoning
 const mustReason = new Set();
 
-async function callLLM(system, user, schema, progress, effort) {
+// purpose is 'generate' or 'grade', which picks the max output tokens
+async function callLLM(system, user, schema, progress, effort, purpose) {
     const provider = settings.provider;
     const apiKey = unlockedKeys[provider];
     if (!apiKey) throw new Error('Save or unlock your API key for this provider first.');
     const model = currentModel();
     if (!model) throw new Error('Enter a model ID.');
     requestStart = performance.now();
-    const call = e => PROVIDERS[provider].call(apiKey, model, system, user, schema, currentMaxTokens(), e, progress);
+    const call = e => PROVIDERS[provider].call(apiKey, model, system, user, schema, currentMaxTokens(purpose), e, progress);
     const key = provider + '/' + model;
     if (effort !== 'none' || mustReason.has(key)) return call(effort === 'none' ? 'low' : effort);
     try {
@@ -1051,6 +1064,13 @@ function renderUsage() {
         : '';
 }
 
+// a blank box means automatic, so show the automatic value as its placeholder
+function renderMaxTokenPlaceholders() {
+    for (const purpose of ['generate', 'grade']) {
+        el[purpose + 'MaxTokens'].placeholder = 'auto (' + autoMaxTokens(purpose).toLocaleString() + ')';
+    }
+}
+
 function renderKeyStatus() {
     const provider = settings.provider;
     if (unlockedKeys[provider]) {
@@ -1192,7 +1212,7 @@ async function generate() {
             const progress = startProgress(attempt ? 'Generating again (some symbols were missing)' : 'Generating text', el.generateArea);
             try {
                 // no reasoning, to keep generation fast; grading uses the chosen effort
-                result = await callLLM(system, user, GENERATION_SCHEMA, progress, 'none');
+                result = await callLLM(system, user, GENERATION_SCHEMA, progress, 'none', 'generate');
             } finally {
                 progress.done();
             }
@@ -1245,7 +1265,7 @@ async function submit() {
             const progress = startProgress('Grading', el.gradeArea);
             let result;
             try {
-                result = await callLLM(gradingSystemPrompt(script), gradingUserPrompt(item, answer), GRADING_SCHEMA, progress, settings.effort);
+                result = await callLLM(gradingSystemPrompt(script), gradingUserPrompt(item, answer), GRADING_SCHEMA, progress, settings.effort, 'grade');
             } finally {
                 progress.done();
             }
@@ -1376,7 +1396,7 @@ function init() {
         provider: byId('provider'), model: byId('model'), customModel: byId('custom_model'), refreshModels: byId('refresh_models'),
         apiKey: byId('api_key'), passphrase: byId('passphrase'), saveKey: byId('save_key'), unlockKey: byId('unlock_key'),
         forgetKey: byId('forget_key'), keyStatus: byId('key_status'),
-        effort: byId('effort'), maxTokens: byId('max_tokens'), skipExact: byId('skip_exact'), usage: byId('usage'),
+        effort: byId('effort'), generateMaxTokens: byId('generate_max_tokens'), gradeMaxTokens: byId('grade_max_tokens'), skipExact: byId('skip_exact'), usage: byId('usage'),
         script: byId('script'), difficulty: byId('difficulty'), scriptInfo: byId('script_info'),
         settingsError: byId('settings_error'), keyGuide: byId('key_guide'),
         generate: byId('generate'), sentence: byId('sentence'), note: byId('note'),
@@ -1395,7 +1415,14 @@ function init() {
 
     el.provider.value = settings.provider;
     el.effort.value = settings.effort;
-    el.maxTokens.value = settings.maxTokens || '';
+    for (const purpose of ['generate', 'grade']) {
+        const input = el[purpose + 'MaxTokens'];
+        input.value = settings[purpose + 'MaxTokens'] || '';
+        input.addEventListener('change', () => {
+            const value = parseInt(input.value, 10);
+            saveSetting(purpose + 'MaxTokens', value > 0 ? value : null);
+        });
+    }
     el.skipExact.checked = settings.skipExact;
     el.script.value = settings.script;
     el.difficulty.value = settings.difficulty;
@@ -1418,10 +1445,9 @@ function init() {
     el.forgetKey.addEventListener('click', forgetKey);
     onEnterSubmit(el.passphrase, () => (el.apiKey.value.trim() ? saveKey() : unlockKey()));
 
-    el.effort.addEventListener('change', () => saveSetting('effort', el.effort.value));
-    el.maxTokens.addEventListener('change', () => {
-        const value = parseInt(el.maxTokens.value, 10);
-        saveSetting('maxTokens', value > 0 ? value : null);
+    el.effort.addEventListener('change', () => {
+        saveSetting('effort', el.effort.value);
+        renderMaxTokenPlaceholders();
     });
     el.skipExact.addEventListener('change', () => saveSetting('skipExact', el.skipExact.checked));
 
@@ -1432,7 +1458,10 @@ function init() {
         renderScriptInfo();
         renderStats();
     });
-    el.difficulty.addEventListener('change', () => saveSetting('difficulty', el.difficulty.value));
+    el.difficulty.addEventListener('change', () => {
+        saveSetting('difficulty', el.difficulty.value);
+        renderMaxTokenPlaceholders();
+    });
 
     el.generate.addEventListener('click', generate);
     el.next.addEventListener('click', generate);
@@ -1455,6 +1484,7 @@ function init() {
     renderScriptInfo();
     renderStats();
     renderUsage();
+    renderMaxTokenPlaceholders();
     clearPractice();
 }
 

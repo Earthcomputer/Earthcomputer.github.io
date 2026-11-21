@@ -107,3 +107,7 @@ summary {
     padding: 4px 10px;
     margin: 8px 0;
 }
+
+#generate_max_tokens, #grade_max_tokens {
+    width: 9em;
+}

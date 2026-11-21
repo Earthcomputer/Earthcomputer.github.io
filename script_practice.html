@@ -58,9 +58,12 @@ script: /scripts/script_practice.js
             <span class="sp_note">Generating text always uses as little reasoning as the model allows.</span>
         </div>
         <div class="sp_row">
-            <label>Max output tokens: <input type="number" id="max_tokens" min="256" step="256" placeholder="auto"></label>
-            <span class="sp_note">Leave blank to scale with the difficulty.</span>
+            <label>Max output tokens for generating: <input type="number" id="generate_max_tokens" min="256" step="256"></label>
         </div>
+        <div class="sp_row">
+            <label>Max output tokens for grading: <input type="number" id="grade_max_tokens" min="256" step="256"></label>
+        </div>
+        <p class="sp_note">Leave blank to scale with the difficulty (and, for grading, the reasoning effort).</p>
         <div class="sp_row">
             <label><input type="checkbox" id="skip_exact"> Don't send a grading request when my answer exactly matches the reference</label>
         </div>
