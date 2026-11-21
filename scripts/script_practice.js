@@ -164,7 +164,7 @@ function stripMarks(s) {
 // Removes differences that never matter, per script. Applied to the whole transliteration before splitting it into words.
 const CANON = {
     // accents may always be dropped, as may the macrons on ī and ō
-    greek: s => stripMarks(s),
+    greek: s => stripMarks(s).replace('f', 'ph'),
     // the apostrophes and quotes used for ь and ъ, turned into letters so they stay part of the word
     cyrillic: s => s.normalize('NFC').replace(/['’ʼ′]/g, 'ʹ').replace(/["”“″]/g, 'ʺ'),
     // case, and hyphens or apostrophes between syllables
