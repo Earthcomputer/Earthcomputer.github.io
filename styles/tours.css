@@ -1,0 +1,65 @@
+main h1, main h2, main h3, main h4, main h5, main h6 {
+    font-family: "Consolas", "Courier New", Courier, monospace;
+}
+
+main h4 {
+    margin-top: 1.5em;
+    scroll-margin-top: 10px;
+}
+
+/* Standalone images (e.g. the overview map) */
+main img {
+    display: block;
+    max-width: 100%;
+    max-height: 60vh;
+    height: auto;
+}
+
+/* Subtitle date under each location heading */
+.date {
+    padding-top: 0;
+    font-size: 0.85em;
+    font-style: italic;
+    color: #a0a0a0;
+}
+
+/* Horizontally scrollable row of photos for each location */
+.gallery {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    max-width: none;
+    scroll-snap-type: x proximity;
+}
+
+.gallery img {
+    flex: 0 0 auto;
+    height: 300px;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    scroll-snap-align: start;
+    /* Reserve some space while lazy images load */
+    min-width: 200px;
+    background-color: #1e1a1a;
+}
+
+@media only screen and (max-width: 720px) {
+    .gallery img {
+        height: 200px;
+        min-width: 133px;
+    }
+}
+
+/* Table of contents */
+#markdown-toc {
+    list-style: none;
+    padding-left: 10px;
+    columns: 3 220px;
+    max-width: 1000px;
+}
+
+#markdown-toc li {
+    break-inside: avoid;
+    padding: 2px 0;
+}

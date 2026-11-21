@@ -50,6 +50,45 @@ nav a:hover {
     text-decoration: underline;
 }
 
+nav .dropdown {
+    position: relative;
+}
+
+nav .dropdown_toggle {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+nav .dropdown_toggle:hover {
+    text-decoration: underline;
+}
+
+nav .dropdown_menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: -1px;
+    margin: 0;
+    z-index: 10;
+    background-color: black;
+    min-width: 100%;
+}
+
+nav .dropdown:hover .dropdown_menu,
+nav .dropdown:focus-within .dropdown_menu {
+    display: block;
+}
+
+nav .dropdown_menu li {
+    display: block;
+    white-space: nowrap;
+}
+
 h1, h2, h3, h4, h5, h6 {
     color: #00A800;
 }
@@ -122,6 +161,11 @@ ul ul, ol ul {
 ol ol, ul ol {
     list-style-type: lower-latin;
     margin-left: 15px;
+}
+
+li ul, li ol {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 table {
