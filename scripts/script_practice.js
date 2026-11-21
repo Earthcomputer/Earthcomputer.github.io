@@ -138,7 +138,7 @@ const SCRIPTS = [
         separator: '·',
         symbolsOf: characterSymbolsOf(/[\p{Script=Hiragana}\p{Script=Katakana}ー]/u),
         symbolDescription: 'a single kana exactly as written, so hiragana and katakana are different symbols, and small kana and ー are symbols of their own',
-        writingNotes: 'Write only in kana, never kanji: hiragana for native words and katakana for loanwords and foreign names, as they would naturally be written (minus kanji).',
+        writingNotes: 'Write only in kana, never kanji: hiragana for native words and katakana for loanwords and foreign names, as they would naturally be written (minus kanji). Try to include more katakana words than usual if there\'s room.',
         gradingNotes: [
             'Accept Hepburn and Kunrei-shiki values (し shi or si, ち chi or ti, つ tsu or tu, ふ fu or hu, じ ji or zi).',
             'Long vowels must be marked: with a macron (ō) or circumflex (ô), or by writing the kana as spelled (おう ou, ええ ee, ー as a doubled vowel). Writing a long vowel as a plain short vowel is a mistake.',
